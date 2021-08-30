@@ -5,7 +5,7 @@ Time is a factor, there are timed events in the mission that can effect the leve
 1910s-20s aesthetic, look at 90s Coen brothers movies like Miller's Crossing, Malick films (Days of Heaven)
 
 Code thoughts:
-
+Do opaque structs provide type safety over void pointers? Research
 
 Code layout:
 
