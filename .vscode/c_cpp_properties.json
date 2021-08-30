@@ -1,0 +1,18 @@
+{
+  "configurations": [
+    {
+      "name": "Win64",
+      "includePath": [
+        "${workspaceFolder}/**"
+      ],
+      "defines": [
+        "_DEBUG",
+        "UNICODE",
+        "_UNICODE",
+        "PLATFORM_WINDOWS"
+      ],
+      "cStandard": "c11"
+    }
+  ],
+  "version": 4
+}
