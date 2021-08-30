@@ -191,11 +191,16 @@ static struct FileSystemAPI windowsFileSystem = {
 
 #pragma region DLL Handling
 
+File windowsDLLOpen(const char *path) {
+    File result = { 0 };
+    return result;
+}
+
 void windowsDLLClose(File *dll) {
 }
 
 static struct DLLAPI windowsDLLHandling = {
-    // .Open = windowsDLLOpen,
+    .Open = windowsDLLOpen,
     .Close = windowsDLLClose
 };
 

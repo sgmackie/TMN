@@ -41,6 +41,10 @@ REM Code generator
 set CodeGeneratorPath=%ProjectPath%\tools\code_generation
 set CodeGeneratorSource=%CodeGeneratorPath%\code_generator.c
 %Compiler% %CompilerFlags% /I%CodePath% %CodeGeneratorSource%
+if not %ERRORLEVEL% == 0 (
+    goto end
+)
+
 code_generator.exe %CodePath%
 
 
@@ -48,11 +52,17 @@ REM Core module
 set CorePath=%ProjectPath%\code\core
 set CoreSource=%CorePath%\memory.c
 %Compiler% %CompilerFlags% /I%CodePath% %CoreSource% /LD /Fecore
-
+if not %ERRORLEVEL% == 0 (
+    goto end
+)
 
 REM Unit tests
 set UnitTesterPath=%ProjectPath%\tools\unit_testing
 set UnitTesterSource=%UnitTesterPath%\unit_tester.c
 %Compiler% %CompilerFlags% /I%CodePath% %UnitTesterSource%
+if not %ERRORLEVEL% == 0 (
+    goto end
+)
 
-popd
+:end
+    popd
