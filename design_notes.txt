@@ -4,6 +4,7 @@ Thief style game, missions in "spoke" based levels with a central location surro
 Time is a factor, there are timed events in the mission that can effect the level e.g weather
 1910s-20s aesthetic, look at 90s Coen brothers movies like Miller's Crossing, Malick films (Days of Heaven)
 
+Code thoughts:
 
 
 Code layout:
