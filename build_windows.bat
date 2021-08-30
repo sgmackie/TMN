@@ -8,7 +8,7 @@ REM MSVC version
 if "%1"=="" (
 REM 2019
 @REM call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
-set Compiler="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29910\bin\Hostx64\x64\cl.exe"
+set Compiler="cl"
 set CompilerFlags=/std:c11
 ) else if "%1"=="2012" (
 REM 2012 
