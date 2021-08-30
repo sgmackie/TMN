@@ -48,6 +48,7 @@ typedef struct FileInfo {
 typedef struct FileSystemAPI {
     FileInfo (*GetFileInfo)(const char *path);
     FileInfo *(*FindFiles)(const char *path, const char *filter, Allocator *allocator);
+    FileInfo (*GetWorkingDirectory)(Allocator *allocator);
     bool (*RemoveFile)(const char *path);
 } FileSystemAPI;
 
@@ -87,9 +88,20 @@ typedef struct PlatformAPI {
 #pragma region Utility Functions
 
 // Uses the "MultiByteToWideChar" function to convert a utf8 char to utf16 wide char
-#define WINDOWS_UTF8_TO_UTF16(input, output)                                \
-    usize bufferSize = MultiByteToWideChar(CP_UTF8, 0, input, -1, NULL, 0); \
-    MultiByteToWideChar(CP_UTF8, 0, input, -1, output, bufferSize);
+#define WINDOWS_UTF8_TO_UTF16(__input, __output)                                \
+    usize __bufferSize = MultiByteToWideChar(CP_UTF8, 0, __input, -1, NULL, 0); \
+    MultiByteToWideChar(CP_UTF8, 0, __input, -1, __output, __bufferSize);
+
+#define WINDOWS_UTF16_TO_UTF8(__input, __output)                                            \
+    usize __bufferSize = WideCharToMultiByte(CP_UTF8, 0, __input, -1, NULL, 0, NULL, NULL); \
+    WideCharToMultiByte(CP_UTF8, 0, __input, -1, __output, __bufferSize, NULL, NULL);
+
+char *windowsConvertUTF16ToUTF8(wchar_t *input, Allocator *allocator) {
+    usize bufferSize = WideCharToMultiByte(CP_UTF8, 0, input, -1, NULL, 0, NULL, NULL);
+    char *output = allocator->Reallocate(allocator, 0, sizeof(char) * bufferSize + 1);
+    WideCharToMultiByte(CP_UTF8, 0, input, -1, output, bufferSize, NULL, NULL);
+    return output;
+}
 
 // Combine two u32s together by shifting the high part to the left:
 // (0x0000000000000001 << 32) = 0x0000000100000000
@@ -176,6 +188,20 @@ FileInfo *windowsFindFiles(const char *path, const char *filter, Allocator *allo
     return test;
 }
 
+FileInfo windowsGetWorkingDirectory(Allocator *allocator) {
+    FileInfo result = { 0 };
+
+    wchar_t wideString[MAX_PATH];
+    if (GetCurrentDirectoryW(MAX_PATH, wideString) == 0)
+        return result;
+
+    result.flags |= FILE_IS_VALID;
+    result.flags |= FILE_IS_DIRECTORY;
+    result.path = windowsConvertUTF16ToUTF8(wideString, allocator);
+
+    return result;
+}
+
 bool windowsFileSystemRemoveFile(const char *path) {
     // return DeleteFileW(path);
     return false;
@@ -184,7 +210,8 @@ bool windowsFileSystemRemoveFile(const char *path) {
 static struct FileSystemAPI windowsFileSystem = {
     .GetFileInfo = windowsFileSystemGetInfo,
     .FindFiles = windowsFindFiles,
-    .RemoveFile = windowsFileSystemRemoveFile
+    .RemoveFile = windowsFileSystemRemoveFile,
+    .GetWorkingDirectory = windowsGetWorkingDirectory
 };
 
 #pragma endregion
