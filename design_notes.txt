@@ -1,3 +1,10 @@
+
+//RETHINK!
+//Trying to seperate the platform - generator - core code is just overcomplicating the code heirarchy and limiting core portability
+//Just move everything into core and use stretchy buffers as the generic data type
+//Try to keep scope of the core code limited to avoid the need for code generation - need:
+//Platform layer, alloctors (arena, pool, tagged, temp), plugin system for hot loading DLLs, logging and profiling functions
+
 Game design:
 
 Thief style game, missions in "spoke" based levels with a central location surrounded by smaller exploration zones
