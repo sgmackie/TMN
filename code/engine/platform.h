@@ -19,7 +19,7 @@ typedef struct VirtualMemoryAPI {
 
 typedef struct File {
     u64 handle;
-    bool isValid;
+    bool isValid; //TODO: Remove this and use the FileInfoFlags instead?
 } File;
 
 typedef struct FileAPI {
@@ -36,7 +36,8 @@ typedef enum FileInfoFlags {
     FILE_IS_VALID = 10,
     FILE_IS_DIRECTORY = 20,
     FILE_IS_HIDDEN = 30,
-    FILE_IS_READONLY = 40
+    FILE_IS_READONLY = 40,
+    FILE_IS_PROCESS = 50
 } FileInfoFlags;
 
 typedef struct FileInfo {
@@ -49,6 +50,7 @@ typedef struct FileSystemAPI {
     FileInfo (*GetFileInfo)(const char *path);
     FileInfo *(*FindFiles)(const char *path, const char *filter, Allocator *allocator);
     FileInfo (*GetWorkingDirectory)(Allocator *allocator);
+    FileInfo (*GetProcessName)(Allocator *allocator);
     bool (*RemoveFile)(const char *path);
 } FileSystemAPI;
 
@@ -192,11 +194,25 @@ FileInfo windowsGetWorkingDirectory(Allocator *allocator) {
     FileInfo result = { 0 };
 
     wchar_t wideString[MAX_PATH];
-    if (GetCurrentDirectoryW(MAX_PATH, wideString) == 0)
+    if (!GetCurrentDirectoryW(MAX_PATH, wideString))
         return result;
 
     result.flags |= FILE_IS_VALID;
     result.flags |= FILE_IS_DIRECTORY;
+    result.path = windowsConvertUTF16ToUTF8(wideString, allocator);
+
+    return result;
+}
+
+FileInfo windowsGetProcessName(Allocator *allocator) {
+    FileInfo result = { 0 };
+
+    wchar_t wideString[MAX_PATH];
+    if (!GetModuleFileNameW(0, wideString, MAX_PATH))
+        return result;
+
+    result.flags |= FILE_IS_VALID;
+    result.flags |= FILE_IS_PROCESS;
     result.path = windowsConvertUTF16ToUTF8(wideString, allocator);
 
     return result;
@@ -211,7 +227,8 @@ static struct FileSystemAPI windowsFileSystem = {
     .GetFileInfo = windowsFileSystemGetInfo,
     .FindFiles = windowsFindFiles,
     .RemoveFile = windowsFileSystemRemoveFile,
-    .GetWorkingDirectory = windowsGetWorkingDirectory
+    .GetWorkingDirectory = windowsGetWorkingDirectory,
+    .GetProcessName = windowsGetProcessName
 };
 
 #pragma endregion
@@ -220,10 +237,21 @@ static struct FileSystemAPI windowsFileSystem = {
 
 File windowsDLLOpen(const char *path) {
     File result = { 0 };
+
+    wchar_t wideString[MAX_PATH];
+    WINDOWS_UTF8_TO_UTF16(path, wideString);
+    HMODULE handle = LoadLibraryExW(wideString, 0, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_SYSTEM32);
+    result.handle = (u64)handle;
+    result.isValid = handle != 0 ? true : false;
+
     return result;
 }
 
 void windowsDLLClose(File *dll) {
+    if (!dll->isValid)
+        return;
+
+    FreeLibrary((HMODULE)dll->handle);
 }
 
 static struct DLLAPI windowsDLLHandling = {

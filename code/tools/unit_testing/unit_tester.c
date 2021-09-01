@@ -6,8 +6,11 @@ int main(int argc, char **argv) {
         return;
 
     // Load modules
-    platform->dll->Open(argv[1]);
+    File coreDLL = platform->dll->Open(argv[1]);
     // MemoryArena arena = CreateMemoryArena();
     // f32 *array = arena.allocator.Reallocate(&arena.allocator, 0, sizeof(f32) * 64);
+
+    platform->dll->Close(&coreDLL);
+
     return 0;
 }

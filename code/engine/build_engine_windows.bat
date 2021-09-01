@@ -6,7 +6,8 @@ set CodePath=%ProjectPath%\code
 set OutputPath=%ProjectPath%\build
 
 REM Commom options
-set CompilerFlags=/nologo /WX /WL /FC /Wv:18 %CompilerFlags%
+set Compiler=cl
+set CompilerFlags=/nologo /WX /WL /FC /Wv:18
 set CompilerFlags=/DPLATFORM_WINDOWS=1 %CompilerFlags%
 
 REM Release builds
