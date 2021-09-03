@@ -1,6 +1,8 @@
 #pragma once
 
-#include <platform.h>
+#include "allocators.h"
+#include "types.h"
+
 
 #define MEMORY_ARENA_ALIGNMENT 4
 #define MEMORY_ARENA_BLOCK_SIZE 1024

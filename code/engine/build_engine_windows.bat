@@ -33,22 +33,11 @@ REM Start build
 if not exist %OutputPath% mkdir %OutputPath%
 pushd %OutputPath%
 
-REM Code generator 
-set CodeGeneratorPath=%CodePath%\tools\code_generation
-set CodeGeneratorSource=%CodeGeneratorPath%\code_generator.c
-%Compiler% %CompilerFlags% /I%CodePath%\engine %CodeGeneratorSource%
-if not %ERRORLEVEL% == 0 (
-    goto end
-)
-
-REM Run code generator
-code_generator.exe %CodePath%
-
-
 REM Core module
 set CorePath=%CodePath%\engine\core
 set CoreSource=%CorePath%\memory.c
-%Compiler% %CompilerFlags% /I%CodePath%\engine %CoreSource% /LD /Fecore
+%Compiler% %CompilerFlags% /I%CodePath%\engine %CoreSource% /c /Focore
+lib /NOLOGO /WX /VERBOSE core.obj
 if not %ERRORLEVEL% == 0 (
     goto end
 )
@@ -56,7 +45,7 @@ if not %ERRORLEVEL% == 0 (
 REM Unit tests
 set UnitTesterPath=%CodePath%\tools\unit_testing
 set UnitTesterSource=%UnitTesterPath%\unit_tester.c
-%Compiler% %CompilerFlags% /I%CodePath%\engine %UnitTesterSource%
+%Compiler% %CompilerFlags% /I%CodePath%\engine %UnitTesterSource% core.lib
 if not %ERRORLEVEL% == 0 (
     goto end
 )

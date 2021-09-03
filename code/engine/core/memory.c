@@ -1,5 +1,6 @@
 #include "memory.h"
 #include "math.h"
+#include "platform.h"
 
 usize GetAlignmentOffset(MemoryArena *arena, usize alignment) {
     usize result = 0;

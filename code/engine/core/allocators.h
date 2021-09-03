@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.inl"
+#include "types.h"
 
 // Prefer opaque structs to void pointers!
 typedef struct AlloctorInstance AllocatorInstance;
