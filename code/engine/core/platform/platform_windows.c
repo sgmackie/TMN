@@ -50,6 +50,34 @@ static struct VirtualMemoryAPI windowsVirtualMemory = {
 
 #pragma endregion
 
+#pragma region Time
+
+static u64 windowsTimeGetCPU() {
+    LARGE_INTEGER counter;
+    QueryPerformanceCounter(&counter);
+    return counter.QuadPart;
+}
+
+static SystemTime windowsTimeGetSystem() {
+    SystemTime result = { 0 };
+    SYSTEMTIME counter;
+    GetSystemTime(&counter);
+
+    result.hours = counter.wHour;
+    result.minutes = counter.wMinute;
+    result.seconds = counter.wSecond;
+    result.milliseconds = counter.wMilliseconds;
+
+    return result;
+}
+
+static struct TimeAPI windowsTime = {
+    .GetCPU = windowsTimeGetCPU,
+    .GetSystem = windowsTimeGetSystem
+};
+
+#pragma endregion
+
 #pragma region File IO
 
 static File windowsFileOpenToRead(const char *path) {
@@ -185,8 +213,12 @@ static struct DLLAPI windowsDLLHandling = {
 static void windowsSystemLog(const char *file, const u32 line, const char *text) {
     //TODO: Create our own sprintf (or at least look at the STB one)
     //TODO: Handle dynamic memory allocations here
+    char time[16];
+    SystemTime systemTime = platform->time->GetSystem();
+    sprintf(time, "%u:%u:%u:%u", systemTime.hours, systemTime.minutes, systemTime.seconds, systemTime.milliseconds);
+
     char message[CORE_PLATFORM_MAX_LOG_SIZE];
-    if (sprintf(message, "[%u] %s \t %s(%u)\n", 0, text, file, line)) { //TODO: Is the time accurate here? Should it be captured when the log function is called rather than in this function?
+    if (sprintf(message, "[%s] %s \t %s(%u)\n", time, text, file, line)) { //TODO: Is the time accurate here? Should it be captured when the log function is called rather than in this function?
         //TODO: Use Wide char version
         OutputDebugStringA(message);
         return;
@@ -210,6 +242,7 @@ static struct SystemAPI windowsSystem = {
 
 static struct PlatformAPI windowsPlatform = {
     .virtualMemory = &windowsVirtualMemory,
+    .time = &windowsTime,
     .file = &windowsFileIO,
     .fileSystem = &windowsFileSystem,
     .dll = &windowsDLLHandling,

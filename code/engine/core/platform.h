@@ -13,6 +13,22 @@ typedef struct VirtualMemoryAPI {
 
 #pragma endregion
 
+#pragma region Time
+
+typedef struct SystemTime {
+    u32 hours;
+    u32 minutes;
+    u32 seconds;
+    u32 milliseconds;
+} SystemTime;
+
+typedef struct TimeAPI {
+    u64 (*GetCPU)();
+    SystemTime (*GetSystem)();
+} TimeAPI;
+
+#pragma endregion
+
 #pragma region File IO
 
 typedef struct File {
@@ -66,6 +82,7 @@ typedef struct DLLAPI {
 #pragma region General System
 
 typedef struct SystemAPI {
+    //TODO: This function shouldn't be appending strings - it should just take a single char buffer to pass to the system's console out (move the rest to the profiler code)
     void (*Log)(const char *file, const u32 line, const char *text);
     void (*DebugBreak)();
 } SystemAPI;
@@ -76,6 +93,7 @@ typedef struct SystemAPI {
 
 typedef struct PlatformAPI {
     VirtualMemoryAPI *virtualMemory;
+    TimeAPI *time;
     FileAPI *file;
     FileSystemAPI *fileSystem;
     DLLAPI *dll;
