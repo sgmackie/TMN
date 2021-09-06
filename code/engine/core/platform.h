@@ -66,7 +66,7 @@ typedef struct DLLAPI {
 #pragma region General System
 
 typedef struct SystemAPI {
-    void (*Log)(const char *text);
+    void (*Log)(const char *file, const u32 line, const char *text);
     void (*DebugBreak)();
 } SystemAPI;
 

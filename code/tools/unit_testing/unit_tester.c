@@ -1,7 +1,7 @@
 #include <core.h>
 
 int main(int argc, char **argv) {
-    platform->system->Log("start");
+    LOG("Start tests");
     ASSERT(argc == 1, "Invalid arg count");
 
     // Load modules

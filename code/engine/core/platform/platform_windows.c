@@ -182,8 +182,17 @@ static struct DLLAPI windowsDLLHandling = {
 
 #pragma region General System
 
-static void windowsSystemLog(const char *text) {
-    printf(text);
+static void windowsSystemLog(const char *file, const u32 line, const char *text) {
+    //TODO: Create our own sprintf (or at least look at the STB one)
+    //TODO: Handle dynamic memory allocations here
+    char message[CORE_PLATFORM_MAX_LOG_SIZE];
+    if (sprintf(message, "[%u] %s \t %s(%u)\n", 0, text, file, line)) { //TODO: Is the time accurate here? Should it be captured when the log function is called rather than in this function?
+        //TODO: Use Wide char version
+        OutputDebugStringA(message);
+        return;
+    }
+
+    OutputDebugStringA("Message too long!\n");
 }
 
 static void windowsDebugBreak() {
