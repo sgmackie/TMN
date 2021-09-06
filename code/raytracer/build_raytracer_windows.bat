@@ -14,11 +14,11 @@ REM Release builds
 if "%1"=="release" set ReleaseBuild = true 
 if "%1"=="Release" set ReleaseBuild = true 
 if "%ReleaseBuild%"=="true" (
-    echo Engine: Release Build
+    echo Raytracer: Release Build
     set CompilerFlags=/O2 /MD /Zo %CompilerFlags%
     set CompilerLibFlags=/O2 /MT /Zo %CompilerFlags%
 ) else (
-    echo Engine: Debug Build
+    echo Raytracer: Debug Build
     set CompilerFlags=/Od /MDd /Zi %CompilerFlags%
     set CompilerLibFlags=/O2 /MTd /Zo %CompilerFlags%
 )
@@ -35,14 +35,14 @@ REM Start build
 if not exist %OutputPath% mkdir %OutputPath%
 pushd %OutputPath%
 
-
-REM Unit tests
-set UnitTesterPath=%CodePath%\tools\unit_testing
-set UnitTesterSource=%UnitTesterPath%\unit_tester.c
-%Compiler% %CompilerFlags% /I%CodePath%\engine %UnitTesterSource%
+REM Raytracer project 
+set RaytracerPath=%CodePath%\raytracer\
+set RaytracerSource=%RaytracerPath%\raytracer.c
+%Compiler% %CompilerFlags% /I%CodePath%\engine %RaytracerSource%
 if not %ERRORLEVEL% == 0 (
     goto end
 )
+
 
 :end
     popd
