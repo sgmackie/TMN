@@ -1,9 +1,5 @@
 
-//RETHINK!
-//Trying to seperate the platform - generator - core code is just overcomplicating the code heirarchy and limiting core portability
-//Just move everything into core and use stretchy buffers as the generic data type
-//Try to keep scope of the core code limited to avoid the need for code generation - need:
-//Platform layer, alloctors (arena, pool, tagged, temp), plugin system for hot loading DLLs, logging and profiling functions
+
 
 Game design:
 
@@ -13,6 +9,9 @@ Time is a factor, there are timed events in the mission that can effect the leve
 
 Code thoughts:
 Do opaque structs provide type safety over void pointers? Research
+
+Code style:
+ObjectAction(object, parameters, extraObjects, returnValues)
 
 Code layout:
 
