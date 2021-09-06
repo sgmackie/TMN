@@ -3,9 +3,8 @@
 #include "allocators.h"
 #include "types.h"
 
-
-#define MEMORY_ARENA_ALIGNMENT 4
-#define MEMORY_ARENA_BLOCK_SIZE 1024
+#define CORE_MEMORY_ARENA_ALIGNMENT 4
+#define CORE_MEMORY_ARENA_BLOCK_SIZE 1024
 
 typedef struct MemoryArenaBlock {
     u8 *base;
@@ -20,6 +19,6 @@ typedef struct MemoryArena {
     Allocator allocator;
 } MemoryArena;
 
-usize GetAlignmentOffset(MemoryArena *arena, usize alignment);
+usize AlignmentGetOffset(MemoryArena *arena, usize alignment);
 void *MemoryArenaPush(Allocator *allocator, void *block, usize size);
-MemoryArena CreateMemoryArena();
+MemoryArena MemoryArenaCreate();

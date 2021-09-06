@@ -6,19 +6,12 @@
 typedef struct AlloctorInstance AllocatorInstance;
 
 typedef struct Allocator {
-    usize initialSize;
-
+    // Data to be used by different allocator types
     AllocatorInstance *instanceData;
 
     // Allocation function
-    void *(*Reallocate)(struct Allocator *allocator, void *oldBlock, usize newSize);
+    void *(*Reallocate)(struct Allocator *allocator, void *currentAllocation, usize newSize);
 
     // Free
-    void (*Free)(void *block, usize size);
-
-    // Memset block values to 0 (do I need the size type?)
-    void (*Clear)(void *block);
-
-    // Frees all memory
-    void (*Destroy)(void *block);
+    void (*Free)(void *currentAllocation, usize size);
 } Allocator;

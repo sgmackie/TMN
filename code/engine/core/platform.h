@@ -63,6 +63,15 @@ typedef struct DLLAPI {
 
 #pragma endregion
 
+#pragma region General System
+
+typedef struct SystemAPI {
+    void (*Log)(const char *text);
+    void (*DebugBreak)();
+} SystemAPI;
+
+#pragma endregion
+
 #pragma region Global API
 
 typedef struct PlatformAPI {
@@ -70,8 +79,9 @@ typedef struct PlatformAPI {
     FileAPI *file;
     FileSystemAPI *fileSystem;
     DLLAPI *dll;
+    SystemAPI *system;
 } PlatformAPI;
 
-static PlatformAPI *platform;
+static struct PlatformAPI *platform;
 
 #pragma endregion

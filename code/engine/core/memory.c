@@ -1,8 +1,10 @@
+#pragma once
+
 #include "memory.h"
 #include "math.h"
 #include "platform.h"
 
-usize GetAlignmentOffset(MemoryArena *arena, usize alignment) {
+usize AlignmentGetOffset(MemoryArena *arena, usize alignment) {
     usize result = 0;
     usize spacePointer = (usize)arena->currentBlock->base + arena->currentBlock->usedSpace;
 
@@ -18,12 +20,12 @@ void *PushMemoryArena(Allocator *allocator, void *block, usize size) {
 
     usize newSize = 0;
     if (arena->currentBlock)
-        newSize = size + GetAlignmentOffset(arena, MEMORY_ARENA_ALIGNMENT);
+        newSize = size + AlignmentGetOffset(arena, CORE_MEMORY_ARENA_ALIGNMENT);
 
     // Grow the arena
     if (!arena->currentBlock || (arena->currentBlock->usedSpace + newSize) > arena->currentBlock->size) {
         newSize = size;
-        arena->minimumBlockSize = MEMORY_ARENA_BLOCK_SIZE;
+        arena->minimumBlockSize = CORE_MEMORY_ARENA_BLOCK_SIZE;
         usize blockSize = Maximum(newSize, arena->minimumBlockSize);
 
         // TODO: Add a flag to set how we allocate memory here, might not always be VM
@@ -32,7 +34,7 @@ void *PushMemoryArena(Allocator *allocator, void *block, usize size) {
         arena->currentBlock = newBlock;
     }
 
-    usize alignmentOffset = GetAlignmentOffset(arena, MEMORY_ARENA_ALIGNMENT);
+    usize alignmentOffset = AlignmentGetOffset(arena, CORE_MEMORY_ARENA_ALIGNMENT);
     uptr blockOffset = arena->currentBlock->usedSpace + alignmentOffset;
     result = arena->currentBlock->base + blockOffset;
     arena->currentBlock->usedSpace += newSize;
@@ -41,7 +43,7 @@ void *PushMemoryArena(Allocator *allocator, void *block, usize size) {
     return result;
 }
 
-MemoryArena CreateMemoryArena() {
+MemoryArena MemoryArenaCreate() {
     MemoryArena result = { 0 };
     result.allocator.Reallocate = PushMemoryArena;
     return result;

@@ -1,14 +1,15 @@
-#include <core/memory.h>
-#include <core/platform.h>
-
+#include <core.h>
 
 int main(int argc, char **argv) {
-    if (argc != 2)
-        return;
+    platform->system->Log("start");
+    ASSERT(argc == 1, "Invalid arg count");
 
     // Load modules
     File coreDLL = platform->dll->Open(argv[1]);
-    MemoryArena arena = CreateMemoryArena();
+
+    ASSERT(coreDLL.isValid, "Test");
+
+    MemoryArena arena = MemoryArenaCreate();
     f32 *array = arena.allocator.Reallocate(&arena.allocator, 0, sizeof(f32) * 64);
 
     platform->dll->Close(&coreDLL);

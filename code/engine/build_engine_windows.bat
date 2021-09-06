@@ -8,7 +8,7 @@ set OutputPath=%ProjectPath%\build
 REM Commom options
 set Compiler=cl
 set CompilerFlags=/nologo /WX /WL /FC /Wv:18
-set CompilerFlags=/DPLATFORM_WINDOWS=1 %CompilerFlags%
+set CompilerFlags=/DCORE_PLATFORM_WINDOWS=1 /DGLOBAL_USE_ASSERTS=1 %CompilerFlags%
 
 REM Release builds
 if "%1"=="release" set ReleaseBuild = true 
@@ -16,9 +16,11 @@ if "%1"=="Release" set ReleaseBuild = true
 if "%ReleaseBuild%"=="true" (
     echo Release Build
     set CompilerFlags=/O2 /MD /Zo %CompilerFlags%
+    set CompilerLibFlags=/O2 /MT /Zo %CompilerFlags%
 ) else (
     echo Debug Build
     set CompilerFlags=/Od /MDd /Zi %CompilerFlags%
+    set CompilerLibFlags=/O2 /MTd /Zo %CompilerFlags%
 )
 
 REM Compiler tools
@@ -33,19 +35,10 @@ REM Start build
 if not exist %OutputPath% mkdir %OutputPath%
 pushd %OutputPath%
 
-REM Core module
-set CorePath=%CodePath%\engine\core
-set CoreSource=%CorePath%\memory.c
-%Compiler% %CompilerFlags% /I%CodePath%\engine %CoreSource% /c /Focore
-lib /NOLOGO /WX /VERBOSE core.obj
-if not %ERRORLEVEL% == 0 (
-    goto end
-)
-
 REM Unit tests
 set UnitTesterPath=%CodePath%\tools\unit_testing
 set UnitTesterSource=%UnitTesterPath%\unit_tester.c
-%Compiler% %CompilerFlags% /I%CodePath%\engine %UnitTesterSource% core.lib
+%Compiler% %CompilerFlags% /I%CodePath%\engine %UnitTesterSource%
 if not %ERRORLEVEL% == 0 (
     goto end
 )

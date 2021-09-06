@@ -1,8 +1,9 @@
+#include "../math.h"
 #include "../platform.h"
 
 #pragma region Windows
 
-#if defined(PLATFORM_WINDOWS)
+#if defined(CORE_PLATFORM_WINDOWS)
 
 #define WIN32_LEAN_AND_MEAN
 #include <wchar.h>
@@ -29,22 +30,16 @@ char *windowsConvertUTF16ToUTF8(wchar_t *input, Allocator *allocator) {
     return output;
 }
 
-// Combine two u32s together by shifting the high part to the left:
-// (0x0000000000000001 << 32) = 0x0000000100000000
-u64 windowsU32Combine(u32 highPart, u32 lowPart) {
-    return (u64)highPart << 32 | lowPart;
-}
-
 #pragma endregion
 
 #pragma region Virtual Memory
 
-void *windowsVirtualAllocate(const usize size) {
+static void *windowsVirtualAllocate(const usize size) {
     void *block = VirtualAlloc(0, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
     return block;
 }
 
-void windowsVirtualFree(void *block, const usize size) {
+static void windowsVirtualFree(void *block, const usize size) {
     VirtualFree(block, size, MEM_RELEASE);
 }
 
@@ -57,7 +52,7 @@ static struct VirtualMemoryAPI windowsVirtualMemory = {
 
 #pragma region File IO
 
-File windowsFileOpenToRead(const char *path) {
+static File windowsFileOpenToRead(const char *path) {
     File result = { 0 };
 
     usize wideCharSize = MultiByteToWideChar(CP_UTF8, 0, path, -1, NULL, 0);
@@ -71,7 +66,7 @@ File windowsFileOpenToRead(const char *path) {
     return result;
 }
 
-void windowsFileClose(File *file) {
+static void windowsFileClose(File *file) {
     if (file->isValid)
         CloseHandle((HANDLE)file->handle);
 }
@@ -85,7 +80,7 @@ static struct FileAPI windowsFileIO = {
 
 #pragma region File System
 
-FileInfo windowsFileSystemGetInfo(const char *path) {
+static FileInfo windowsFileSystemGetInfo(const char *path) {
     FileInfo result = { 0 };
 
     wchar_t wideString[MAX_PATH];
@@ -105,16 +100,16 @@ FileInfo windowsFileSystemGetInfo(const char *path) {
     if (attributeData.dwFileAttributes & FILE_ATTRIBUTE_READONLY)
         result.flags |= FILE_IS_READONLY;
 
-    result.size = windowsU32Combine(attributeData.nFileSizeHigh, attributeData.nFileSizeLow);
+    result.size = U32CombineHighLow(attributeData.nFileSizeHigh, attributeData.nFileSizeLow);
     return result;
 }
 
-FileInfo *windowsFindFiles(const char *path, const char *filter, Allocator *allocator) {
+static FileInfo *windowsFindFiles(const char *path, const char *filter, Allocator *allocator) {
     FileInfo *test = (FileInfo *)allocator->Reallocate(allocator, 0, sizeof(FileInfo));
     return test;
 }
 
-FileInfo windowsGetWorkingDirectory(Allocator *allocator) {
+static FileInfo windowsGetWorkingDirectory(Allocator *allocator) {
     FileInfo result = { 0 };
 
     wchar_t wideString[MAX_PATH];
@@ -128,7 +123,7 @@ FileInfo windowsGetWorkingDirectory(Allocator *allocator) {
     return result;
 }
 
-FileInfo windowsGetProcessName(Allocator *allocator) {
+static FileInfo windowsGetProcessName(Allocator *allocator) {
     FileInfo result = { 0 };
 
     wchar_t wideString[MAX_PATH];
@@ -142,7 +137,7 @@ FileInfo windowsGetProcessName(Allocator *allocator) {
     return result;
 }
 
-bool windowsFileSystemRemoveFile(const char *path) {
+static bool windowsFileSystemRemoveFile(const char *path) {
     // return DeleteFileW(path);
     return false;
 }
@@ -159,7 +154,7 @@ static struct FileSystemAPI windowsFileSystem = {
 
 #pragma region DLL Handling
 
-File windowsDLLOpen(const char *path) {
+static File windowsDLLOpen(const char *path) {
     File result = { 0 };
 
     wchar_t wideString[MAX_PATH];
@@ -171,7 +166,7 @@ File windowsDLLOpen(const char *path) {
     return result;
 }
 
-void windowsDLLClose(File *dll) {
+static void windowsDLLClose(File *dll) {
     if (!dll->isValid)
         return;
 
@@ -185,16 +180,34 @@ static struct DLLAPI windowsDLLHandling = {
 
 #pragma endregion
 
+#pragma region General System
+
+static void windowsSystemLog(const char *text) {
+    printf(text);
+}
+
+static void windowsDebugBreak() {
+    DebugBreak();
+}
+
+static struct SystemAPI windowsSystem = {
+    .Log = windowsSystemLog,
+    .DebugBreak = windowsDebugBreak
+};
+
+#pragma endregion
+
 #pragma region Global API
 
 static struct PlatformAPI windowsPlatform = {
     .virtualMemory = &windowsVirtualMemory,
     .file = &windowsFileIO,
     .fileSystem = &windowsFileSystem,
-    .dll = &windowsDLLHandling
+    .dll = &windowsDLLHandling,
+    .system = &windowsSystem
 };
 
-platform = &windowsPlatform;
+struct PlatformAPI *platform = &windowsPlatform;
 
 #pragma endregion
 
