@@ -4,6 +4,7 @@
         "memory.h": "c",
         "platform.h": "c",
         "math.h": "c",
-        "allocators.h": "c"
+        "allocators.h": "c",
+        "core.h": "c"
     }
 }

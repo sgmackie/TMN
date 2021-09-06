@@ -9,7 +9,9 @@
         "_DEBUG",
         "UNICODE",
         "_UNICODE",
-        "PLATFORM_WINDOWS"
+        "GLOBAL_USE_ASSERTS",
+        "CORE_PLATFORM_WINDOWS",
+        "WIN32_LEAN_AND_MEAN"
       ],
       "cStandard": "c11"
     }
