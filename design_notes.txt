@@ -1,6 +1,3 @@
-
-
-
 Game design:
 
 Thief style game, missions in "spoke" based levels with a central location surrounded by smaller exploration zones
@@ -9,6 +6,7 @@ Time is a factor, there are timed events in the mission that can effect the leve
 
 Code thoughts:
 Do opaque structs provide type safety over void pointers? Research
+0 is ALWAYS a valid number - if everything is initialised to 0 by default, then everything should work with 0 without major error
 
 Code style:
 ObjectAction(object, parameters, extraObjects, returnValues)
