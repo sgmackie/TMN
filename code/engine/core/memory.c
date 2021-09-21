@@ -3,48 +3,26 @@
 #include "memory.h"
 #include "math.h"
 #include "platform.h"
+#include "profiling.h"
 
-usize AlignmentGetOffset(MemoryArena *arena, usize alignment) {
-    usize result = 0;
-    usize spacePointer = (usize)arena->currentBlock->base + arena->currentBlock->usedSpace;
+void *MemoryVirtualReallocate(Allocator *allocator, void *currentAllocation, usize oldSize, usize newSize) {
+    void *pointer = platform->virtualMemory->Allocate(newSize);
+    ASSERT(pointer != NULL, "Memory: Virtual Allocator failed to commit pages!");
+    allocator->currentSize += newSize;
 
-    if (spacePointer & (alignment - 1))
-        result = alignment - (spacePointer & (alignment - 1));
-
-    return result;
+    return pointer;
 }
 
-void *PushMemoryArena(Allocator *allocator, void *block, usize size) {
-    void *result = 0;
-    MemoryArena *arena = (MemoryArena *)allocator->instanceData;
-
-    usize newSize = 0;
-    if (arena->currentBlock)
-        newSize = size + AlignmentGetOffset(arena, CORE_MEMORY_ARENA_ALIGNMENT);
-
-    // Grow the arena
-    if (!arena->currentBlock || (arena->currentBlock->usedSpace + newSize) > arena->currentBlock->size) {
-        newSize = size;
-        arena->minimumBlockSize = CORE_MEMORY_ARENA_BLOCK_SIZE;
-        usize blockSize = Maximum(newSize, arena->minimumBlockSize);
-
-        // TODO: Add a flag to set how we allocate memory here, might not always be VM
-        MemoryArenaBlock *newBlock = platform->virtualMemory->Allocate(blockSize);
-        newBlock->previousBlock = arena->currentBlock;
-        arena->currentBlock = newBlock;
-    }
-
-    usize alignmentOffset = AlignmentGetOffset(arena, CORE_MEMORY_ARENA_ALIGNMENT);
-    uptr blockOffset = arena->currentBlock->usedSpace + alignmentOffset;
-    result = arena->currentBlock->base + blockOffset;
-    arena->currentBlock->usedSpace += newSize;
-    memset(result, 0, newSize);
-
-    return result;
+void MemoryVirtualFree(Allocator *allocator, void *currentAllocation, usize size) {
+    ASSERT(size >= allocator->currentSize, "Memory: Virtual Allocator trying to free size larger than committed");
+    platform->virtualMemory->Free(currentAllocation, size);
+    allocator->currentSize -= size;
 }
 
-MemoryArena MemoryArenaCreate() {
-    MemoryArena result = { 0 };
-    result.allocator.Reallocate = PushMemoryArena;
+Allocator MemoryVirtualAllocatorCreate() {
+    Allocator result = { 0 };
+    result.currentSize = 0;
+    result.Reallocate = MemoryVirtualReallocate;
+    result.Free = MemoryVirtualFree;
     return result;
 }

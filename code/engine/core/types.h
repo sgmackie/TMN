@@ -1,6 +1,7 @@
 #pragma once
 
 // Typedefs
+#include <assert.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -29,3 +30,9 @@ typedef double f64;
 typedef size_t usize;
 typedef uintptr_t uptr;
 typedef intptr_t iptr;
+
+// Sizes
+#define Kilobytes(value) ((value)*1024LL)
+#define Megabytes(value) (Kilobytes(value) * 1024LL)
+#define Gigabytes(value) (Megabytes(value) * 1024LL)
+#define Terabytes(value) (Gigabytes(value) * 1024LL)

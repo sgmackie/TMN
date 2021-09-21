@@ -1,18 +1,57 @@
 #include <core.h>
 
+#define MAX_TEST_CASES 1
+#define MAX_TEST_REPEAT_COUNT 4
+
+#define TEST_CONDITION(test, text, result)                          \
+    if (test) {                                                     \
+        result = TEST_PASS;                                         \
+    } else {                                                        \
+        result = TEST_FAIL;                                         \
+        platform->system->LogConsole(__FUNCTION__, __LINE__, text); \
+    }
+
+typedef enum TestResult {
+    TEST_FAIL,
+    TEST_PASS
+} TestResult;
+
+typedef struct TestUnit {
+    TestResult (*TestCase)();
+} TestUnit;
+
+static TestResult TestAllocators() {
+    TestResult result = TEST_FAIL;
+
+    // Virtual Allocator
+    Allocator virtualAlloctor = MemoryVirtualAllocatorCreate();
+    const usize allocationSize = (sizeof(i32) * 16);
+    i32 *array = virtualAlloctor.Reallocate(&virtualAlloctor, NULL, 0, allocationSize);
+    TEST_CONDITION(array != NULL, "Virtually allocated address is invalid!", result);
+
+    virtualAlloctor.Free(&virtualAlloctor, array, allocationSize);
+    TEST_CONDITION(virtualAlloctor.currentSize == 0, "Virtual allocation size is not 0 after free!", result);
+
+    return result;
+}
+
 int main(int argc, char **argv) {
-    LOG("Start tests");
-    ASSERT(argc == 1, "Invalid arg count");
+    TestUnit testCases[MAX_TEST_CASES];
 
-    // Load modules
-    File coreDLL = platform->dll->Open(argv[1]);
+    // Create tests
+    testCases[0].TestCase = TestAllocators;
 
-    ASSERT(coreDLL.isValid, "Test");
+    // Run tests
+    TestResult mainResult = TEST_FAIL;
+    for (usize i = 0; i < MAX_TEST_CASES; ++i) {
+        for (usize j = 0; j < MAX_TEST_REPEAT_COUNT; ++j) {
+            mainResult = testCases[i].TestCase();
 
-    MemoryArena arena = MemoryArenaCreate();
-    f32 *array = arena.allocator.Reallocate(&arena.allocator, 0, sizeof(f32) * 64);
+            if (mainResult == TEST_FAIL) {
+                return 0;
+            }
+        }
+    }
 
-    platform->dll->Close(&coreDLL);
-
-    return 0;
+    return 1;
 }

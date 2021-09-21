@@ -25,7 +25,7 @@
 
 char *windowsConvertUTF16ToUTF8(wchar_t *input, Allocator *allocator) {
     usize bufferSize = WideCharToMultiByte(CP_UTF8, 0, input, -1, NULL, 0, NULL, NULL);
-    char *output = allocator->Reallocate(allocator, 0, sizeof(char) * bufferSize + 1);
+    char *output = allocator->Reallocate(allocator, 0, 0, sizeof(char) * bufferSize + 1);
     WideCharToMultiByte(CP_UTF8, 0, input, -1, output, bufferSize, NULL, NULL);
     return output;
 }
@@ -40,7 +40,7 @@ static void *windowsVirtualAllocate(const usize size) {
 }
 
 static void windowsVirtualFree(void *block, const usize size) {
-    VirtualFree(block, size, MEM_RELEASE);
+    // VirtualFree(block, size, MEM_RELEASE);
 }
 
 static struct VirtualMemoryAPI windowsVirtualMemory = {
@@ -133,7 +133,7 @@ static FileInfo windowsFileSystemGetInfo(const char *path) {
 }
 
 static FileInfo *windowsFindFiles(const char *path, const char *filter, Allocator *allocator) {
-    FileInfo *test = (FileInfo *)allocator->Reallocate(allocator, 0, sizeof(FileInfo));
+    FileInfo *test = (FileInfo *)allocator->Reallocate(allocator, 0, 0, sizeof(FileInfo));
     return test;
 }
 
@@ -210,7 +210,7 @@ static struct DLLAPI windowsDLLHandling = {
 
 #pragma region General System
 
-static void windowsSystemLog(const char *file, const u32 line, const char *text) {
+static void windowsSystemLogDebug(const char *location, const u32 line, const char *text) {
     //TODO: Create our own sprintf (or at least look at the STB one)
     //TODO: Handle dynamic memory allocations here
     char time[16];
@@ -218,7 +218,7 @@ static void windowsSystemLog(const char *file, const u32 line, const char *text)
     sprintf(time, "%u:%u:%u:%u", systemTime.hours, systemTime.minutes, systemTime.seconds, systemTime.milliseconds);
 
     char message[CORE_PLATFORM_MAX_LOG_SIZE];
-    if (sprintf(message, "[%s] %s \t %s(%u)\n", time, text, file, line)) { //TODO: Is the time accurate here? Should it be captured when the log function is called rather than in this function?
+    if (sprintf(message, "[%s] %s \t %s(%u)\n", time, text, location, line)) { //TODO: Is the time accurate here? Should it be captured when the log function is called rather than in this function?
         //TODO: Use Wide char version
         OutputDebugStringA(message);
         return;
@@ -227,12 +227,38 @@ static void windowsSystemLog(const char *file, const u32 line, const char *text)
     OutputDebugStringA("Message too long!\n");
 }
 
+static void windowsSystemLogConsole(const char *location, const u32 line, const char *text) {
+    char time[16];
+    SystemTime systemTime = platform->time->GetSystem();
+    sprintf(time, "%u:%u:%u:%u", systemTime.hours, systemTime.minutes, systemTime.seconds, systemTime.milliseconds);
+
+    char message[CORE_PLATFORM_MAX_LOG_SIZE];
+    if (sprintf(message, "[%s] %s \t %s(%u)\n", time, text, location, line)) {
+        printf(message);
+        return;
+    }
+
+    // //TODO: Get the WideChar converter working here
+    // wchar_t time[16];
+    // SystemTime systemTime = platform->time->GetSystem();
+    // swprintf_s(time, 16, "%u:%u:%u:%u", systemTime.hours, systemTime.minutes, systemTime.seconds, systemTime.milliseconds);
+
+    // wchar_t message[CORE_PLATFORM_MAX_LOG_SIZE];
+    // if (swprintf_s(message, "[%s] %s \t %s(%u)\n", time, text, location, line)) {
+    //     HANDLE outputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    //     DWORD charsWritten = 0;
+    //     WriteConsoleW(outputHandle, message, _tcslen(message), &charsWritten, NULL);
+    //     CloseHandle(outputHandle);
+    // }
+}
+
 static void windowsDebugBreak() {
     DebugBreak();
 }
 
 static struct SystemAPI windowsSystem = {
-    .Log = windowsSystemLog,
+    .LogDebug = windowsSystemLogDebug,
+    .LogConsole = windowsSystemLogConsole,
     .DebugBreak = windowsDebugBreak
 };
 

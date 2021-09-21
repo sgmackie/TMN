@@ -5,6 +5,7 @@
         "platform.h": "c",
         "math.h": "c",
         "allocators.h": "c",
-        "core.h": "c"
+        "core.h": "c",
+        "profiling.h": "c"
     }
 }

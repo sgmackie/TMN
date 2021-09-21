@@ -82,8 +82,9 @@ typedef struct DLLAPI {
 #pragma region General System
 
 typedef struct SystemAPI {
-    //TODO: This function shouldn't be appending strings - it should just take a single char buffer to pass to the system's console out (move the rest to the profiler code)
-    void (*Log)(const char *file, const u32 line, const char *text);
+    //TODO: These functions shouldn't be appending strings - it should just take a single char buffer to pass to the system's console out (move the rest to the profiler code)
+    void (*LogConsole)(const char *location, const u32 line, const char *text);
+    void (*LogDebug)(const char *location, const u32 line, const char *text);
     void (*DebugBreak)();
 } SystemAPI;
 
