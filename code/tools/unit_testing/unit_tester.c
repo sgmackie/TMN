@@ -20,6 +20,12 @@ typedef struct TestUnit {
     TestResult (*TestCase)();
 } TestUnit;
 
+static void I32ArrayLoop(i32 *array, const usize count) {
+    for (usize i = 0; i < count; ++i) {
+        array[i] = (i + 1) + count;
+    }
+}
+
 static TestResult TestAllocators() {
     TestResult result = TEST_FAIL;
 
@@ -29,8 +35,20 @@ static TestResult TestAllocators() {
     i32 *array = virtualAlloctor.Reallocate(&virtualAlloctor, NULL, 0, allocationSize);
     TEST_CONDITION(array != NULL, "Virtually allocated address is invalid!", result);
 
+    I32ArrayLoop(array, 16);
+    TEST_CONDITION(array[15] == (16 * 2), "Allocated array is invalid!", result);
+
     virtualAlloctor.Free(&virtualAlloctor, array, allocationSize);
     TEST_CONDITION(virtualAlloctor.currentSize == 0, "Virtual allocation size is not 0 after free!", result);
+
+    // Memory Arena
+    Allocator memoryArena = MemoryArenaCreate(&virtualAlloctor);
+    TEST_CONDITION(memoryArena.instanceData != NULL, "Memory Arena has no backing allocator!", result);
+    MemoryArenaDestroy(&memoryArena);
+    TEST_CONDITION(memoryArena.instanceData == NULL, "Memory Arena was not destroyed correctly!", result);
+
+    // Cleanup
+    MemoryVirtualAllocatorDestroy(&virtualAlloctor);
 
     return result;
 }

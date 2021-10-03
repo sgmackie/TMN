@@ -7,7 +7,8 @@
 #pragma region Virtual Memory
 
 typedef struct VirtualMemoryAPI {
-    void *(*Allocate)(const usize size);
+    void *(*Reserve)(const usize size);
+    void *(*Commit)(void *block, const usize size);
     void (*Free)(void *block, const usize size);
 } VirtualMemoryAPI;
 

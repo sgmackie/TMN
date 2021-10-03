@@ -1,6 +1,6 @@
-@REM @echo off
+@echo off
 
-REM Build engine a tests
+REM Build engine and tests
 call %~dp0\engine\build_engine_windows.bat
 
 REM Run test suite

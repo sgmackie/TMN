@@ -34,17 +34,21 @@ char *windowsConvertUTF16ToUTF8(wchar_t *input, Allocator *allocator) {
 
 #pragma region Virtual Memory
 
-static void *windowsVirtualAllocate(const usize size) {
-    void *block = VirtualAlloc(0, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-    return block;
+static void *windowsVirtualReserve(const usize size) {
+    return VirtualAlloc(0, size, MEM_RESERVE, PAGE_READWRITE);
+}
+
+static void *windowsVirtualCommit(void *block, const usize size) {
+    return VirtualAlloc(block, size, MEM_COMMIT, PAGE_READWRITE);
 }
 
 static void windowsVirtualFree(void *block, const usize size) {
-    // VirtualFree(block, size, MEM_RELEASE);
+    VirtualFree(block, size, MEM_RELEASE);
 }
 
 static struct VirtualMemoryAPI windowsVirtualMemory = {
-    .Allocate = windowsVirtualAllocate,
+    .Reserve = windowsVirtualReserve,
+    .Commit = windowsVirtualCommit,
     .Free = windowsVirtualFree
 };
 

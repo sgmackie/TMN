@@ -7,5 +7,6 @@
         "allocators.h": "c",
         "core.h": "c",
         "profiling.h": "c"
-    }
+    },
+    "editor.formatOnSave": true,
 }
