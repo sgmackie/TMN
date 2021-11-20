@@ -3,7 +3,8 @@
     {
       "name": "Win64",
       "includePath": [
-        "${workspaceFolder}/**"
+        "${workspaceFolder}/**",
+        "C:/ProgrammingBins/**"
       ],
       "defines": [
         "_DEBUG",
@@ -13,7 +14,7 @@
         "CORE_PLATFORM_WINDOWS",
         "WIN32_LEAN_AND_MEAN"
       ],
-      "cStandard": "c11"
+      "cppStandard": "c++14"
     }
   ],
   "version": 4

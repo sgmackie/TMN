@@ -15,5 +15,5 @@ BraceWrapping:
   BeforeCatch:     false
   BeforeElse:      false
   IndentBraces:    false
-NamespaceIndentation: All
+NamespaceIndentation: Inner
 AllowShortCaseLabelsOnASingleLine: true
