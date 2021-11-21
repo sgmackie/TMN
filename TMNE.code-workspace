@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"xmemory": "cpp",
+			"memory.h": "c",
+			"platform.h": "c",
+			"math.h": "c",
+			"allocators.h": "c",
+			"core.h": "c",
+			"profiling.h": "c"
+		}
+	}
+}

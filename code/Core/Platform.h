@@ -2,15 +2,18 @@
 
 #include "Types.h"
 
-namespace Core
-{
-namespace Platform
-{
+namespace Core {
+namespace Platform {
     // File IO
     typedef struct File {
         u64 Handle;
     } File;
 
-    File FileOpen(const char path);
+    typedef enum FileAccessMode {
+        FILE_READ,
+        FILE_WRITE
+    } FileAccessMode;
+
+    File FileOpen(const char *path, const FileAccessMode mode);
 }
 }

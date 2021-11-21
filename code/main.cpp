@@ -1,14 +1,18 @@
 #include "Core/Platform.h"
-#include "Types.h"
+#include "Core/Types.h"
 
 using namespace Core;
+using namespace Platform;
 
 // https : //www.kotaku.com.au/2018/01/the-exceptional-beauty-of-doom-3s-source-code-2/
 
-int main() {
+// TODO: Setup the Gitlab CI pipeline
+
+int main()
+{
     // Get the raytracer up and running
 
-    Platform::FileOpen(0);
+    FileOpen("TEST", FILE_READ);
 
     return 0;
 }

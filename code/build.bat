@@ -9,6 +9,7 @@ set OutputPath=%ProjectPath%\build
 REM Commom options
 set Compiler=cl
 set CompilerFlags=/nologo /WX /WL /FC /Wv:18 /std:c++14
+set CompilerFlags=/DCORE_PLATFORM_WINDOWS=1 %CompilerFlags%
 
 REM Release builds
 if "%1"=="release" set ReleaseBuild = true 
@@ -35,14 +36,21 @@ REM Start build
 if not exist %OutputPath% mkdir %OutputPath%
 pushd %OutputPath%
 
+REM List headers
+set HeaderFiles=/I%CodePath%
+set HeaderFiles=/I%CodePath%\Core %HeaderFiles%
+
 REM List sources
 set SourceFiles=%CodePath%\main.cpp
+set SourceFiles=%CodePath%\Core\Source\Unicode.cpp %SourceFiles%
+set SourceFiles=%CodePath%\Core\Source\PlatformWindows.cpp %SourceFiles%
 
-%Compiler% %CompilerFlags% /I%CodePath% %SourceFiles%
+%Compiler% %CompilerFlags% %SourceFiles%
 if not %ERRORLEVEL% == 0 (
     goto end
 )
 
-
 :end
+    REM Delete intermediate files
+    del *.obj
     popd

@@ -3,14 +3,12 @@
     {
       "name": "Win64",
       "includePath": [
-        "${workspaceFolder}/**",
-        "C:/ProgrammingBins/**"
+        "${workspaceFolder}/**"
       ],
       "defines": [
         "_DEBUG",
         "UNICODE",
         "_UNICODE",
-        "GLOBAL_USE_ASSERTS",
         "CORE_PLATFORM_WINDOWS",
         "WIN32_LEAN_AND_MEAN"
       ],
