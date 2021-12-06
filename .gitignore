@@ -2,3 +2,5 @@ build/
 .vs/
 *.rdbg
 *.exe
+*.cmake
+CMakeFiles/

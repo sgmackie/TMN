@@ -32,7 +32,7 @@ typedef uintptr_t uptr;
 typedef intptr_t iptr;
 
 // Sizes
-#define Kilobytes(value) ((value)*1024LL)
+#define Kilobytes(value) ((value) *1024LL)
 #define Megabytes(value) (Kilobytes(value) * 1024LL)
 #define Gigabytes(value) (Megabytes(value) * 1024LL)
 #define Terabytes(value) (Gigabytes(value) * 1024LL)

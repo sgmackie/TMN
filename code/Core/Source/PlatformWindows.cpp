@@ -1,5 +1,5 @@
-#include "../Platform.h"
-#include "../Unicode.h"
+#include "Platform.hpp"
+#include "Unicode.hpp"
 
 #if defined(CORE_PLATFORM_WINDOWS)
 
@@ -8,16 +8,22 @@
 #include <windows.h>
 
 namespace Core {
-namespace Platform {
+const wchar_t *Platform::CharToWideChar(Allocator *allocator, const char *string)
+{
+    const u16 *utf16 = Unicode::UTF8ConvertToUTF16(allocator, string);
+    return (const wchar_t *) utf16;
+}
 
-    File FileOpen(const char *path, const FileAccessMode mode)
-    {
-        File result = {};
+Platform::File Platform::FileOpen(Allocator *allocator, const char *path, const FileAccessMode mode)
+{
+    File result = {};
 
-        // Unicode::UTF16ConvertToUTF8();
+    const wchar_t *widePath = CharToWideChar(allocator, path);
+    result.Handle = 0;
 
-        return result;
-    }
+    // Unicode::UTF16ConvertToUTF8();
+
+    return result;
 }
 }
 

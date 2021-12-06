@@ -3,7 +3,8 @@
     {
       "name": "Win64",
       "includePath": [
-        "${workspaceFolder}/**"
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/code/Core/Include"
       ],
       "defines": [
         "_DEBUG",
