@@ -9,12 +9,15 @@ set(CMAKE_CXX_STANDARD 14)
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /FC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX /WL")
-else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -pedantic")
 endif()
 
+if(DEBUG)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+endif()
+
+# Set platform flags
 if(WIN32)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DCORE_PLATFORM_WINDOWS=1")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DCORE_PLATFORM_WINDOWS=1")
 endif()
 
 # Export the flags for static analysis
