@@ -1,0 +1,29 @@
+Assests:
+
+Tags should be a first class citizen - all assets should support key:value tagging, all engine systems should have
+access to the tag database. These tags should be used during development to filter and organise, and during runtime to
+support complex, dynamic behaviour. For example:
+
+Fire a gun in the world -> broadcast an action (ojbID, GUN_STATE_FIRING, GetTagsForObject(ojbID)) -> audio/physics systems
+recieve action broadcast, use object tags to infer the enviroment the gun was fired in
+
+Weird West example https://twitter.com/plushapo/status/1470852321496031235
+
+Rendering:
+
+CSG example here, contains bunch of links to CSG/BSP resources (like Thief code) https://github.com/laleksic/tiny_csg
+
+Style:
+
+Look at the Doom 3 code as a reference https://www.kotaku.com.au/2018/01/the-exceptional-beauty-of-doom-3s-source-code-2/
+const everything!
+
+
+Patterns:
+
+Systems should manage their own memory
+Systems should provide handles to objects they manage (with options to convert to pointers) https://floooh.github.io/2018/06/17/handles-vs-pointers.html
+Handles are a struct during debug compiles for type safety, simple typedef in release builds
+Always measure the size of structs! 
+Encode object state in tags to avoid bools OR
+Use seperate arrays for objects instead of checking state (e.g Alive and Dead NPCs in a level are two seperate arrays)

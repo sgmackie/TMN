@@ -1,0 +1,15 @@
+{
+	"Title": "Raytracer",
+	"Type": "Project",
+	"OutputPath": "../../Bin/Raytracer",
+	"DirectoriesToScan": ["../"],
+	"Modules": ["Core"],
+	"CompilerFlags": {
+		"Windows": {
+			"Defines": ["/DTMNE_PLATFORM_WINDOWS=1"],
+			"General": ["/nologo", "/WX", "/WL", "/FC", "/Wv:18"],
+			"Debug": ["/Od /MDd /Zi"],
+			"Release": ["/O2 /MD /Zo"]
+		}
+    }
+}

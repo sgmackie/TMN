@@ -1,0 +1,25 @@
+Narrative:
+
+Why is Outer Wilds great? Uses large, high concepts but tells an emotional story
+Don't want this game to feel completely cold, there should be an obvious, human element/tragedy driving the player from the start
+
+
+Aesthetic:
+Create an art mood board!
+1910s Lovecratian/Alt history?
+Ghost in the Shell cyberpunk?
+
+Setting:
+Kowloon City - megastructure you navigate through
+Setting should be it's own character, mystery to how it operates
+
+Gameplay Loop:
+Thief/Hitman FPS stealth game
+Limited ability set that can interact with the world in multiple ways
+
+Ability to create a loop state in the world that plays back your actions (on a timer? how many states? on command?)
+Each "level" is blocked by a gate - the gate wont open if you've used a loop state
+Should be multiple paths to the gate
+
+CONCERN - it feels like the player is being punished for using the loop states, the ability that will lead to cool,
+emergant momements. Thinking about it, I don't think the gating idea will work

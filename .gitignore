@@ -1,6 +1,6 @@
-build/
+Bin/
 .vs/
 *.rdbg
 *.exe
-*.cmake
-CMakeFiles/
+net6.0/
+obj/

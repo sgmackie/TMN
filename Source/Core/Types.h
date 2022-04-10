@@ -27,7 +27,7 @@ typedef float f32;
 typedef double f64;
 
 // Memory model
-typedef size_t usize;
+typedef u64 usize;
 typedef uintptr_t uptr;
 typedef intptr_t iptr;
 
@@ -36,3 +36,7 @@ typedef intptr_t iptr;
 #define Megabytes(value) (Kilobytes(value) * 1024LL)
 #define Gigabytes(value) (Megabytes(value) * 1024LL)
 #define Terabytes(value) (Gigabytes(value) * 1024LL)
+
+// Min/Max
+#define Minimum(A, B) ((A < B) ? (A) : (B))
+#define Maximum(A, B) ((A > B) ? (A) : (B))
