@@ -9,6 +9,7 @@
                 "build",
                 "-c",
                 "Release",
+                // "Debug",
                 "${workspaceFolder}/Source/TMNEBuild.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"

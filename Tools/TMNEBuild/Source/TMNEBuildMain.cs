@@ -161,6 +161,21 @@ class Program
                     string[] sourceFiles = Directory.GetFiles(moduleRootPath, "*.cpp", SearchOption.AllDirectories);
                     settings.SourceFiles.AddRange(sourceFiles);
                     settings.IncludePaths.Add(moduleRootPath);
+
+                    // 3rdParty dependencies
+                    JsonArray sourceFileDependencies = moduleNode["Dependencies"]["Files"].AsArray();
+                    foreach (var file in sourceFileDependencies)
+                    {
+                        string sourceFilePath = Path.GetFullPath(file.ToString(), rootPath);
+                        settings.SourceFiles.Add(sourceFilePath);
+                    }
+
+                    JsonArray includeFileDependencies = moduleNode["Dependencies"]["Includes"].AsArray();
+                    foreach (var include in includeFileDependencies)
+                    {
+                        string includeFilePath = Path.GetFullPath(include.ToString(), rootPath);
+                        settings.IncludePaths.Add(includeFilePath);
+                    }
                 }
             }
 
@@ -287,16 +302,16 @@ class Program
             return;
         }
 
-        CommandRunner.BuildType buildType = CommandRunner.BuildType.Release;
-        if (String.Equals(arguments[1], "Debug", StringComparison.OrdinalIgnoreCase))
-        {
-            buildType = CommandRunner.BuildType.Debug;
-        }
-
         CommandRunner.BuildPlatform buildPlatform = CommandRunner.BuildPlatform.Windows;
         if (String.Equals(arguments[1], "Linux", StringComparison.OrdinalIgnoreCase))
         {
             buildPlatform = CommandRunner.BuildPlatform.Linux;
+        }
+
+        CommandRunner.BuildType buildType = CommandRunner.BuildType.Release;
+        if (String.Equals(arguments[2], "Debug", StringComparison.OrdinalIgnoreCase))
+        {
+            buildType = CommandRunner.BuildType.Debug;
         }
 
         commandRunner.Run(arguments[0], buildPlatform, buildType);

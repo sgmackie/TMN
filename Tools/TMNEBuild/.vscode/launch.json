@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Source/bin/Debug/net6.0/TMNEBuild.dll",
+            "program": "${workspaceFolder}/Bin/TMNEBuild.dll",
             "args": ["${workspaceFolder}/../../Source/Raytracer/Raytracer.TMNE_BUILD", "Windows", "Debug"],
             "cwd": "${workspaceFolder}/Source",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console

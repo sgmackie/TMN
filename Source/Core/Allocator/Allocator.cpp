@@ -2,23 +2,13 @@
 #include "Platform.h"
 
 namespace Core {
-
-	// Allocator General
-	void *AllocatorGeneral::Allocate(const usize size)
+	void AllocatorHeap::Create()
 	{
-		// MemoryBlock *currentBlock = (MemoryBlock*) Platform::VirtualMap(1);
-
-		usize alignedSize = AlignByTypeSize(size, sizeof(iptr));
-		return nullptr;
+		InternalHeap = mi_heap_new();
 	}
 
-	void *AllocatorGeneral::Reallocate(void *oldPointer, const usize oldSize, const usize newSize)
+	void AllocatorHeap::Destroy()
 	{
-		return nullptr;
-	}
-
-	void AllocatorGeneral::Free(void *pointer, const usize size)
-	{
-		return;
+		mi_heap_destroy(InternalHeap);
 	}
 }

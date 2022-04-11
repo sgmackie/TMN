@@ -1,11 +1,15 @@
 #include "Platform.h"
 #include "Unicode.h"
 
-#if defined(CORE_PLATFORM_WINDOWS)
+#if defined(TMNE_PLATFORM_WINDOWS)
 
+// Includes
 #define WIN32_LEAN_AND_MEAN
 #include <wchar.h>
 #include <windows.h>
+
+// Libs
+#pragma comment(lib, "Advapi32.lib")
 
 namespace Core {
 
@@ -28,28 +32,6 @@ namespace Core {
 	void VirtualUnmap(void *pointer, usize size)
 	{
 		VirtualFree(pointer, 0, MEM_RELEASE);
-	}
-
-	// File IO	
-	const wchar_t *Platform::CharToWideChar(Allocator *allocator, const char *string)
-	{
-		const u16 *utf16 = Unicode::UTF8ConvertToUTF16(allocator, string);
-		return (const wchar_t *) utf16;
-	}
-
-	Platform::File Platform::FileOpen(Allocator *allocator, const char *path, const FileAccessMode mode)
-	{
-		File result = {};
-
-		const wchar_t *widePath = CharToWideChar(allocator, path);
-		result.Handle = 0;
-
-		// EASTL and passing allocators around in template parameters
-		BufferDynamic<char, 12> test;
-
-		// Unicode::UTF16ConvertToUTF8();
-
-		return result;
 	}
 
 }
