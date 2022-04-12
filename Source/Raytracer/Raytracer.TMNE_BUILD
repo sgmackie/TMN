@@ -6,10 +6,11 @@
 	"Modules": ["Core"],
 	"CompilerFlags": {
 		"Windows": {
-			"Defines": ["/DTMNE_PLATFORM_WINDOWS=1"],
-			"General": ["/nologo", "/WX", "/WL", "/FC", "/Wv:18"],
-			"Debug": ["/Od /MDd /Zi"],
-			"Release": ["/O2 /MD /Zo"]
+			"Defines": ["-DTMNE_PLATFORM_WINDOWS=1"],
+			"General": ["-nologo", "-diagnostics:column", "-WX", "-WL", "-FC", "-Wv:18"],
+			"Debug": ["-Od", "-MTd", "-Zi"],
+			"Release": ["-O2", "-MT", "-Zo"],
+			"Linker": ["-incremental:no", "-opt:ref"]
 		}
     }
 }

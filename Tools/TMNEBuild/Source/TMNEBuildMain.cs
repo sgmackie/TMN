@@ -240,12 +240,23 @@ class Program
 
             string batFilePath = Path.Combine(executablePath, "WindowsCompile.bat");
             string argumentList = "cl";
+            string linkerList = " /link";
 
             foreach (var flags in buildSettings.CompileFlags)
             {
-                foreach (var flag in flags.Value)
+                if (String.Equals(flags.Key, "Linker", StringComparison.OrdinalIgnoreCase))
                 {
-                    argumentList += flag;
+                    foreach (var flag in flags.Value)
+                    {
+                        linkerList += flag;
+                    }
+                }
+                else
+                {
+                    foreach (var flag in flags.Value)
+                    {
+                        argumentList += flag;
+                    }
                 }
             }
 
@@ -272,11 +283,11 @@ class Program
             }
 
             LogMessage(LogLevel.Info, buildSettings.Type.ToString() + " " + buildSettings.Title + " (" + buildPlatform.ToString() + " - " + buildType.ToString() + ")");
-            LogMessage(LogLevel.Info, argumentList);
+            LogMessage(LogLevel.Info, argumentList + linkerList);
 
             Process compilerProcess = new Process();
             compilerProcess.StartInfo.FileName = "cmd.exe";
-            compilerProcess.StartInfo.Arguments = "/c call " + argumentList + outputList + includeList + fileList;
+            compilerProcess.StartInfo.Arguments = "/c call " + argumentList + outputList + includeList + fileList + linkerList;
             compilerProcess.StartInfo.UseShellExecute = false;
             compilerProcess.StartInfo.RedirectStandardOutput = true;
             compilerProcess.StartInfo.RedirectStandardError = true;
