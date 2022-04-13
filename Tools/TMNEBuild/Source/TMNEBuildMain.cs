@@ -388,12 +388,12 @@ class Program
                 File.AppendAllText(compileCommandsFile, includePath + Environment.NewLine);
             }
 
-            LogMessage(LogLevel.Info, buildSettings.Type.ToString() + " " + buildSettings.Title + " (" + buildPlatform.ToString() + " - " + buildType.ToString() + ")");
-            LogMessage(LogLevel.Info, compiler + argumentList + linkerList);
-
             // TODO: Can't get the terminal to work on MacOS - just print the commandlist for the time being
             string commandListTotal = compiler + argumentList + outputList + includeList + fileList + linkerList;
             Console.Write(commandListTotal);
+
+            // LogMessage(LogLevel.Info, buildSettings.Type.ToString() + " " + buildSettings.Title + " (" + buildPlatform.ToString() + " - " + buildType.ToString() + ")");
+            // LogMessage(LogLevel.Info, compiler + argumentList + linkerList);
 
             // Process compilerProcess = new Process();
             // compilerProcess.StartInfo.FileName = executablePath + "/../../../BuildProject.sh";

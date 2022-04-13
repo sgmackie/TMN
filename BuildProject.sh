@@ -1,4 +1,5 @@
 #!/bin/sh
 # sudo chmod 755 './BuildProject.sh'
 
-$1
+OUTPUT=$(./Tools/TMNEBuild/Bin/TMNEBuild $1 $2 $3)
+source ./Tools/TMNEBuild/Source/UnixRunner.sh "${OUTPUT}"

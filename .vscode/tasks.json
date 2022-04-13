@@ -1,0 +1,25 @@
+{
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "Run TMNE Debug build",
+            "command": "./BuildProject.sh",
+            "args": [
+                "${workspaceFolder}/Source/Raytracer/Raytracer.TMNE_BUILD",
+                "MacOS",
+                "Debug",
+            ],
+            "options": {
+                "cwd": "${fileDirname}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ],
+    "version": "2.0.0"
+}
