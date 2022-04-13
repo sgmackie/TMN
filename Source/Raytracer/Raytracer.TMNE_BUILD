@@ -11,6 +11,11 @@
 			"Debug": ["-Od", "-MTd", "-Zi"],
 			"Release": ["-O2", "-MT", "-Zo"],
 			"Linker": ["-incremental:no", "-opt:ref"]
-		}
+		},
+        "MacOS": {
+            "Defines": ["-DTMNE_PLATFORM_MACOS=1"],
+            "General": [""],
+            "Debug": ["-g"]
+        }
     }
 }

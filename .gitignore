@@ -4,3 +4,4 @@ Bin/
 *.exe
 net6.0/
 obj/
+*.xcworkspace

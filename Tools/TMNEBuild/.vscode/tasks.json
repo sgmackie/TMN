@@ -8,8 +8,8 @@
             "args": [
                 "build",
                 "-c",
-                "Release",
-                // "Debug",
+                // "Release",
+                "Debug",
                 "${workspaceFolder}/Source/TMNEBuild.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"

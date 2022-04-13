@@ -30,6 +30,7 @@ class Program
         public enum BuildPlatform
         {
             Windows,
+            MacOS,
             Linux
         };
 
@@ -204,7 +205,7 @@ class Program
             return true;
         }
 
-        public void Run(string projectPath, BuildPlatform buildPlatform, BuildType buildType)
+        public void WindowsBuild(string projectPath, BuildPlatform buildPlatform, BuildType buildType)
         {
             if (string.IsNullOrEmpty(projectPath))
             {
@@ -238,7 +239,6 @@ class Program
             string executablePath = Assembly.GetExecutingAssembly().Location;
             executablePath = Path.GetDirectoryName(executablePath);
 
-            string batFilePath = Path.Combine(executablePath, "WindowsCompile.bat");
             string argumentList = "cl";
             string linkerList = " /link";
 
@@ -263,11 +263,11 @@ class Program
             string outputList = "";
             if (buildSettings.Type == BuildSettings.UnitType.Project)
             {
-                string baseOutputBath = buildSettings.OutputPath + Path.DirectorySeparatorChar + buildType.ToString() + Path.DirectorySeparatorChar;
-                Directory.CreateDirectory(baseOutputBath);
-                outputList += " /Fe" + baseOutputBath + buildSettings.Title + ".exe";
-                outputList += " /Fo" + baseOutputBath;
-                outputList += " /Fd" + baseOutputBath + " ";
+                string baseOutputPath = buildSettings.OutputPath + Path.DirectorySeparatorChar + buildType.ToString() + Path.DirectorySeparatorChar;
+                Directory.CreateDirectory(baseOutputPath);
+                outputList += " -Fe" + baseOutputPath + buildSettings.Title + ".exe";
+                outputList += " -Fo" + baseOutputPath;
+                outputList += " -Fd" + baseOutputPath + " ";
             }
 
             string fileList = "";
@@ -279,7 +279,7 @@ class Program
             string includeList = "";
             foreach (string path in buildSettings.IncludePaths)
             {
-                includeList += "/I" + path + " ";
+                includeList += "-I" + path + " ";
             }
 
             LogMessage(LogLevel.Info, buildSettings.Type.ToString() + " " + buildSettings.Title + " (" + buildPlatform.ToString() + " - " + buildType.ToString() + ")");
@@ -288,6 +288,102 @@ class Program
             Process compilerProcess = new Process();
             compilerProcess.StartInfo.FileName = "cmd.exe";
             compilerProcess.StartInfo.Arguments = "/c call " + argumentList + outputList + includeList + fileList + linkerList;
+            compilerProcess.StartInfo.UseShellExecute = false;
+            compilerProcess.StartInfo.RedirectStandardOutput = true;
+            compilerProcess.StartInfo.RedirectStandardError = true;
+            compilerProcess.StartInfo.CreateNoWindow = true;
+            compilerProcess.Start();
+
+            while (!compilerProcess.StandardOutput.EndOfStream)
+            {
+                string currentLine = compilerProcess.StandardOutput.ReadLine();
+                Console.WriteLine(currentLine);
+            }
+
+            compilerProcess.WaitForExit();
+        }
+
+        public void MacOSBuild(string projectPath, BuildPlatform buildPlatform, BuildType buildType)
+        {
+            if (string.IsNullOrEmpty(projectPath))
+            {
+                LogMessage(LogLevel.Error, "Invalid " + BuildFileExtension + " file!");
+                return;
+            }
+
+            FileInfo projectFile = new FileInfo(Path.GetFullPath(projectPath));
+            if (!projectFile.Exists || projectFile.Extension != BuildFileExtension)
+            {
+                LogMessage(LogLevel.Error, "Invalid " + BuildFileExtension + " file!");
+                return;
+            }
+
+            string jsonString = File.ReadAllText(projectFile.FullName);
+            if (string.IsNullOrEmpty(jsonString))
+            {
+                LogMessage(LogLevel.Error, "Invalid " + BuildFileExtension + " file!");
+                return;
+            }
+
+            // Load the settings file and build the command list
+            BuildSettings buildSettings = CreateSettings(jsonString, buildPlatform, buildType, projectFile.DirectoryName);
+            if (!ValidateSettings(buildSettings))
+            {
+                LogMessage(LogLevel.Error, "Invalid " + BuildFileExtension + " file!");
+                return;
+            }
+
+            // Create a compiler process and run the commands
+            string executablePath = Assembly.GetExecutingAssembly().Location;
+            executablePath = Path.GetDirectoryName(executablePath);
+
+            string argumentList = "";
+            string linkerList = "";
+
+            foreach (var flags in buildSettings.CompileFlags)
+            {
+                if (String.Equals(flags.Key, "Linker", StringComparison.OrdinalIgnoreCase))
+                {
+                    foreach (var flag in flags.Value)
+                    {
+                        linkerList += flag;
+                    }
+                }
+                else
+                {
+                    foreach (var flag in flags.Value)
+                    {
+                        argumentList += flag;
+                    }
+                }
+            }
+
+            string outputList = "";
+            if (buildSettings.Type == BuildSettings.UnitType.Project)
+            {
+                string baseOutputPath = buildSettings.OutputPath + Path.DirectorySeparatorChar + buildType.ToString() + Path.DirectorySeparatorChar;
+                Directory.CreateDirectory(baseOutputPath);
+                outputList += " -o" + baseOutputPath + buildSettings.Title + "";
+            }
+
+            string fileList = "";
+            foreach (string file in buildSettings.SourceFiles)
+            {
+                fileList += file + " ";
+            }
+
+            string includeList = "";
+            foreach (string path in buildSettings.IncludePaths)
+            {
+                includeList += "-I" + path + " ";
+            }
+
+            LogMessage(LogLevel.Info, buildSettings.Type.ToString() + " " + buildSettings.Title + " (" + buildPlatform.ToString() + " - " + buildType.ToString() + ")");
+            LogMessage(LogLevel.Info, argumentList + linkerList);
+
+            Process compilerProcess = new Process();
+            compilerProcess.StartInfo.FileName = "clang";
+            compilerProcess.StartInfo.Arguments = argumentList + outputList + includeList + fileList + linkerList;
             compilerProcess.StartInfo.UseShellExecute = false;
             compilerProcess.StartInfo.RedirectStandardOutput = true;
             compilerProcess.StartInfo.RedirectStandardError = true;
@@ -318,6 +414,10 @@ class Program
         {
             buildPlatform = CommandRunner.BuildPlatform.Linux;
         }
+        else if (String.Equals(arguments[1], "MacOS", StringComparison.OrdinalIgnoreCase))
+        {
+            buildPlatform = CommandRunner.BuildPlatform.MacOS;
+        }
 
         CommandRunner.BuildType buildType = CommandRunner.BuildType.Release;
         if (String.Equals(arguments[2], "Debug", StringComparison.OrdinalIgnoreCase))
@@ -325,7 +425,19 @@ class Program
             buildType = CommandRunner.BuildType.Debug;
         }
 
-        commandRunner.Run(arguments[0], buildPlatform, buildType);
+        switch (buildPlatform)
+        {
+            case CommandRunner.BuildPlatform.Windows:
+            {
+                commandRunner.WindowsBuild(arguments[0], buildPlatform, buildType);
+                break;
+            }
+            case CommandRunner.BuildPlatform.MacOS:
+            {
+                commandRunner.MacOSBuild(arguments[0], buildPlatform, buildType);
+                break;
+            }
+        }
 
         return;
     }
