@@ -7,14 +7,14 @@
 	"CompilerFlags": {
 		"Windows": {
 			"Defines": ["-DTMNE_PLATFORM_WINDOWS=1"],
-			"General": ["-nologo", "-diagnostics:column", "-WX", "-WL", "-FC", "-Wv:18"],
+			"General": ["-nologo", "-diagnostics:column", "std:c++17", "-WX", "-WL", "-FC", "-Wv:18"],
 			"Debug": ["-Od", "-MTd", "-Zi"],
 			"Release": ["-O2", "-MT", "-Zo"],
 			"Linker": ["-incremental:no", "-opt:ref"]
 		},
         "MacOS": {
             "Defines": ["-DTMNE_PLATFORM_MACOS=1"],
-            "General": [""],
+            "General": ["-Wall", "-Werror", "-pedantic", "-Wno-c++11-extensions", "-Wno-static-in-inline", "-lc++"],
             "Debug": ["-g"]
         }
     }

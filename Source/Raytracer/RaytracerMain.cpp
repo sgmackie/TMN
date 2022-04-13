@@ -7,10 +7,7 @@ using namespace Core;
 int main()
 {
 	AllocatorHeap globalHeap;
-	globalHeap.Create();
-
-
-	globalHeap.Destroy();
 
 	return 0;
 }
+

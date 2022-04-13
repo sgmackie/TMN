@@ -5,3 +5,5 @@ Bin/
 net6.0/
 obj/
 *.xcworkspace
+*.xcodeproj
+compile_flags.txt

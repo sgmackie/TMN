@@ -2,12 +2,17 @@
 #include "Platform.h"
 
 namespace Core {
-	void AllocatorHeap::Create()
+	void Allocator::Free(void *pointer, const usize size)
+	{
+        return;
+	}
+
+	AllocatorHeap::AllocatorHeap()
 	{
 		InternalHeap = mi_heap_new();
 	}
 
-	void AllocatorHeap::Destroy()
+	AllocatorHeap::~AllocatorHeap()
 	{
 		mi_heap_destroy(InternalHeap);
 	}
@@ -24,5 +29,6 @@ namespace Core {
 
 	void AllocatorHeap::Free(void *pointer, const usize size)
 	{
+        return;
 	}
 }

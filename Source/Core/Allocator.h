@@ -8,6 +8,8 @@ namespace Core {
 	class Allocator
 	{
 	public:
+		Allocator() {};
+		~Allocator() {};
 		virtual void *Allocate(const usize size) = 0;
 		virtual void *Reallocate(void *oldPointer, const usize oldSize, const usize newSize) = 0;
 		virtual void Free(void *pointer, const usize size) = 0;
@@ -16,11 +18,11 @@ namespace Core {
 	class AllocatorHeap : public Allocator
 	{
 	public:
-		void Create();
-		void Destroy();
-		void *Allocate(const usize size) override;
-		void *Reallocate(void *oldPointer, const usize oldSize, const usize newSize) override;
-		void Free(void *pointer, const usize size) override;
+		AllocatorHeap();
+		~AllocatorHeap();
+		void *Allocate(const usize size);
+		void *Reallocate(void *oldPointer, const usize oldSize, const usize newSize);
+		void Free(void *pointer, const usize size);
 
 		mi_heap_t *InternalHeap = nullptr;
 	};

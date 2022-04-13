@@ -1,7 +1,7 @@
+#if defined(TMNE_PLATFORM_WINDOWS)
+
 #include "Platform.h"
 #include "Unicode.h"
-
-#if defined(TMNE_PLATFORM_WINDOWS)
 
 // Includes
 #define WIN32_LEAN_AND_MEAN

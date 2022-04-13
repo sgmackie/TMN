@@ -114,7 +114,7 @@ class Program
                 string[] flagList = new string[flags.Count];
                 for (int i = 0; i < flags.Count; ++i)
                 {
-                    flagList[i] = " " + flags[i].ToString();                   
+                    flagList[i] = flags[i].ToString();                   
                 }
 
                 settings.CompileFlags.Add(flagGroup.Key.ToString(), flagList);
@@ -338,7 +338,12 @@ class Program
             executablePath = Path.GetDirectoryName(executablePath);
 
             string argumentList = "";
+            string compiler = "clang";
             string linkerList = "";
+
+            string compileCommandsFile = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "compile_flags.txt";
+            File.Delete(compileCommandsFile);
+            File.Open(compileCommandsFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
 
             foreach (var flags in buildSettings.CompileFlags)
             {
@@ -346,14 +351,16 @@ class Program
                 {
                     foreach (var flag in flags.Value)
                     {
-                        linkerList += flag;
+                        linkerList += " " + flag;
+                        File.AppendAllText(compileCommandsFile, flag + Environment.NewLine);
                     }
                 }
                 else
                 {
                     foreach (var flag in flags.Value)
                     {
-                        argumentList += flag;
+                        argumentList += " " + flag;
+                        File.AppendAllText(compileCommandsFile, flag + Environment.NewLine);
                     }
                 }
             }
@@ -363,7 +370,8 @@ class Program
             {
                 string baseOutputPath = buildSettings.OutputPath + Path.DirectorySeparatorChar + buildType.ToString() + Path.DirectorySeparatorChar;
                 Directory.CreateDirectory(baseOutputPath);
-                outputList += " -o" + baseOutputPath + buildSettings.Title + "";
+                outputList += " -o" + baseOutputPath + buildSettings.Title + " ";
+                File.AppendAllText(compileCommandsFile, "-o" + baseOutputPath + buildSettings.Title + Environment.NewLine);
             }
 
             string fileList = "";
@@ -375,28 +383,34 @@ class Program
             string includeList = "";
             foreach (string path in buildSettings.IncludePaths)
             {
-                includeList += "-I" + path + " ";
+                string includePath = "-I" + path + " ";
+                includeList += includePath;
+                File.AppendAllText(compileCommandsFile, includePath + Environment.NewLine);
             }
 
             LogMessage(LogLevel.Info, buildSettings.Type.ToString() + " " + buildSettings.Title + " (" + buildPlatform.ToString() + " - " + buildType.ToString() + ")");
-            LogMessage(LogLevel.Info, argumentList + linkerList);
+            LogMessage(LogLevel.Info, compiler + argumentList + linkerList);
 
-            Process compilerProcess = new Process();
-            compilerProcess.StartInfo.FileName = "clang";
-            compilerProcess.StartInfo.Arguments = argumentList + outputList + includeList + fileList + linkerList;
-            compilerProcess.StartInfo.UseShellExecute = false;
-            compilerProcess.StartInfo.RedirectStandardOutput = true;
-            compilerProcess.StartInfo.RedirectStandardError = true;
-            compilerProcess.StartInfo.CreateNoWindow = true;
-            compilerProcess.Start();
+            // TODO: Can't get the terminal to work on MacOS - just print the commandlist for the time being
+            string commandListTotal = compiler + argumentList + outputList + includeList + fileList + linkerList;
+            Console.Write(commandListTotal);
 
-            while (!compilerProcess.StandardOutput.EndOfStream)
-            {
-                string currentLine = compilerProcess.StandardOutput.ReadLine();
-                Console.WriteLine(currentLine);
-            }
+            // Process compilerProcess = new Process();
+            // compilerProcess.StartInfo.FileName = executablePath + "/../../../BuildProject.sh";
+            // compilerProcess.StartInfo.Arguments = argumentList + outputList + includeList + fileList + linkerList;
+            // compilerProcess.StartInfo.UseShellExecute = false;
+            // compilerProcess.StartInfo.RedirectStandardOutput = true;
+            // compilerProcess.StartInfo.RedirectStandardError = true;
+            // compilerProcess.StartInfo.CreateNoWindow = true;
+            // compilerProcess.Start();
 
-            compilerProcess.WaitForExit();
+            // while (!compilerProcess.StandardOutput.EndOfStream)
+            // {
+            //     string currentLine = compilerProcess.StandardOutput.ReadLine();
+            //     Console.WriteLine(currentLine);
+            // }
+
+            // compilerProcess.WaitForExit();
         }
     }
 
