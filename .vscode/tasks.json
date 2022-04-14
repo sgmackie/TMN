@@ -1,10 +1,11 @@
 {
     "tasks": [
         {
-            "type": "cppbuild",
+            "type": "shell",
             "label": "Run TMNE Debug build",
-            "command": "./BuildProject.sh",
+            "command": "${workspaceFolder}/BuildProject.sh",
             "args": [
+                "${workspaceFolder}/Tools/TMNEBuild/",
                 "${workspaceFolder}/Source/Raytracer/Raytracer.TMNE_BUILD",
                 "MacOS",
                 "Debug",
