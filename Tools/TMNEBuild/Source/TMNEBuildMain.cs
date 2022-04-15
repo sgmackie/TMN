@@ -341,7 +341,9 @@ class Program
             string compiler = "clang";
             string linkerList = "";
 
-            string compileCommandsFile = Directory.GetCurrentDirectory() + Path.DirectorySeparatorChar + "compile_flags.txt";
+            // TODO: Find the .git folder to base as the root?
+            string repoRoot = Path.GetFullPath(executablePath + "/../../../");
+            string compileCommandsFile = repoRoot + "compile_flags.txt";
             File.Delete(compileCommandsFile);
             File.Open(compileCommandsFile, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
 
