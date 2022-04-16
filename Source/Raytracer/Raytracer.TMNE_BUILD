@@ -13,7 +13,7 @@
 			"Linker": ["-incremental:no", "-opt:ref"]
 		},
         "MacOS": {
-            "Defines": ["-DTMNE_PLATFORM_MACOS=1"],
+            "Defines": ["-DCORE_PLATFORM_MACOS=1"],
             "General": ["-Wall", "-Werror", "-pedantic", "-Wno-c++11-extensions", "-Wno-static-in-inline", "-lc++"],
             "Debug": ["-g"]
         }

@@ -1,6 +1,7 @@
 #include "Core.h"
 
 using namespace Core;
+using namespace Core::Container;
 
 // TODO: Fix clang-tidy auto save
 
@@ -27,6 +28,10 @@ int main()
 	printf("%llu \n", dynamicArray[89]);
 	printf("%llu \n", dynamicArray[127]);
 	printf("%llu \n", dynamicArray[1]);
+
+	String filePath(&memoryArena, "TEST");
+	Platform::File::OpenToWrite(filePath);
+	printf("%s", filePath.ToCString());
 
 	return 0;
 }

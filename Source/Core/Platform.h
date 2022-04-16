@@ -1,17 +1,5 @@
 #pragma once
 
-#include "Memory.h"
-
-namespace Core {
-namespace Platform {
-	// General
-    const wchar_t *CharToWideChar(Memory::Allocator *Allocator, const char *string);
-
-	// Memory
-	void *VirtualReserve(usize size);
-	void VirtualCommit(void *pointer, usize size);
-	void *VirtualMap(usize size);
-	void VirtualUnmap(void *pointer, usize size);
-}
-}
+#include "Types.h"
+#include "Platform/PlatformFile.h"
 

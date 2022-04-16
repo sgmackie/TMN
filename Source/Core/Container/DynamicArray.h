@@ -18,8 +18,9 @@ namespace Container {
         {
             Count = 0;
             MaxCount = DYNAMIC_ARRAY_MAX_STACK_ELEMENTS;
-            Buffer = nullptr;
+            Buffer = StackBuffer.Buffer;
             Allocator = allocator;
+            IsHeapAllocated = false;
 
             if (reserveCount > 0) {
                 Reserve(reserveCount);
@@ -28,7 +29,7 @@ namespace Container {
 
         ~DynamicArray()
         {
-            if (Buffer != nullptr) {
+            if (IsHeapAllocated) {
                 Allocator->Free(Buffer);
                 Buffer = nullptr;
             }
@@ -44,7 +45,7 @@ namespace Container {
                 return;
             }
 
-            if (Buffer) {
+            if (IsHeapAllocated) {
                 Buffer = Allocator->ReallocateElement<T>(Buffer, MaxCount, reserveCount);
                 MaxCount = reserveCount;
                 return;
@@ -58,10 +59,11 @@ namespace Container {
         {
             if (Count == MaxCount) {
                 MaxCount = Count * DYNAMIC_ARRAY_GROWTH_RATE;
-                if (Buffer == nullptr) {
+                if (!IsHeapAllocated) {
                     Buffer = Allocator->AllocateElement<T>(MaxCount);
                     memmove(Buffer, StackBuffer.Buffer, sizeof(T) * StackBuffer.Count());
                     StackBuffer.Clear();
+                    IsHeapAllocated = true;
                 }
                 else
                 {
@@ -69,7 +71,7 @@ namespace Container {
                 }
             }
 
-            if (Buffer) {
+            if (IsHeapAllocated) {
                 Buffer[Count] = object;
                 ++Count;
                 return Count - 1;
@@ -83,17 +85,19 @@ namespace Container {
         T& operator[] (usize index) 
         {
             assert(index <= (Count - 1));
-            if (Buffer) {
+            if (IsHeapAllocated) {
                 return Buffer[index];
             }
 
             return StackBuffer[index];
         }
 
+        // TODO: Find way to remove bool
+        bool IsHeapAllocated;
         usize Count;
         usize MaxCount;
-        Array<T, DYNAMIC_ARRAY_MAX_STACK_ELEMENTS> StackBuffer;
         T *Buffer;
+        Array<T, DYNAMIC_ARRAY_MAX_STACK_ELEMENTS> StackBuffer;
         Memory::Allocator *Allocator;
     };
 }
