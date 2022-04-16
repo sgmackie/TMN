@@ -2,5 +2,8 @@
 
 #include "Types.h"
 #include "Platform.h"
-#include "Allocator.h"
+#include "Math.h"
+#include "Memory.h"
 
+// Global malloc access
+static Core::Memory::AllocatorMalloc GAllocator;

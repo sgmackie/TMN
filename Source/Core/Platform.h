@@ -1,12 +1,11 @@
 #pragma once
 
-#include "Allocator.h"
-#include <stdio.h>
+#include "Memory.h"
 
 namespace Core {
 namespace Platform {
 	// General
-    const wchar_t *CharToWideChar(Allocator *Allocator, const char *string);
+    const wchar_t *CharToWideChar(Memory::Allocator *Allocator, const char *string);
 
 	// Memory
 	void *VirtualReserve(usize size);

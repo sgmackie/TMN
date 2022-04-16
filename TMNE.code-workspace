@@ -12,7 +12,13 @@
 			"math.h": "c",
 			"allocators.h": "c",
 			"core.h": "c",
-			"profiling.h": "c"
+			"profiling.h": "c",
+			"random": "cpp",
+			"__bit_reference": "cpp",
+			"bitset": "cpp",
+			"chrono": "cpp",
+			"unordered_map": "cpp",
+			"algorithm": "cpp"
 		}
 	},
 	"launch": {
