@@ -14,6 +14,8 @@ int main()
 	printf("%d", test[3]);
 	memoryArena.Free(test);
 
+	Container::Array<f32, 50> safeArray;
+	safeArray[3] = 6.623;
 
 
 	return 0;

@@ -44,7 +44,6 @@ namespace Memory {
 	
 		// Make position relative
 		currentPositionAligned -= (uptr) Buffer;
-
 		if (currentPositionAligned + size > BufferSize)
 		{
 			return nullptr;
