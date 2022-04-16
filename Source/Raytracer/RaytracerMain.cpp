@@ -11,12 +11,20 @@ int main()
 	i32 *test = memoryArena.AllocateElement<i32>(8);
 	test[3] = 235236;
 	test = memoryArena.ReallocateElement<i32>(test, 8, 32);
-	printf("%d", test[3]);
+	printf("%d \n", test[3]);
 	memoryArena.Free(test);
 
 	Container::Array<f32, 50> safeArray;
 	safeArray[3] = 6.623;
 
+	Container::DynamicArray<u64> dynamicArray(&memoryArena);
+
+	for (usize i = 0; i < 128; ++i)
+	{
+		dynamicArray.Add(i);
+	}
+
+	printf("%llu \n", dynamicArray[89]);
 
 	return 0;
 }

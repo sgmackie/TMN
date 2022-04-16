@@ -11,12 +11,17 @@ namespace Container {
     public:
         Array() 
         {
-            memset(Buffer, 0, sizeof(Buffer));
+            Clear();
         }
 
         usize Count() const 
         {                 
             return N;
+        }
+
+        void Clear()
+        {
+            memset(Buffer, 0, sizeof(Buffer));
         }
 
         T& operator[] (usize index) 
