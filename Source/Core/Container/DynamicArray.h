@@ -14,12 +14,16 @@ namespace Container {
         #define DYNAMIC_ARRAY_MAX_STACK_ELEMENTS 16
         #define DYNAMIC_ARRAY_GROWTH_RATE 2
 
-        DynamicArray(Memory::Allocator *allocator)
+        DynamicArray(Memory::Allocator *allocator, const usize reserveCount = 0)
         {
             Count = 0;
             MaxCount = DYNAMIC_ARRAY_MAX_STACK_ELEMENTS;
             Buffer = nullptr;
             Allocator = allocator;
+
+            if (reserveCount > 0) {
+                Reserve(reserveCount);
+            }
         }
 
         ~DynamicArray()
@@ -32,6 +36,21 @@ namespace Container {
             Count = 0;
             MaxCount = 0;
             Allocator = nullptr;
+        }
+
+        void Reserve(const usize reserveCount)
+        {
+            if (reserveCount < MaxCount) {
+                return;
+            }
+
+            if (Buffer) {
+                Buffer = Allocator->ReallocateElement<T>(Buffer, MaxCount, reserveCount);
+                MaxCount = reserveCount;
+                return;
+            }
+
+            Buffer = Allocator->AllocateElement<T>(reserveCount);
         }
 
         // Returns the current index

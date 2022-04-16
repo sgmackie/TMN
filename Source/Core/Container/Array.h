@@ -24,7 +24,7 @@ namespace Container {
             memset(Buffer, 0, sizeof(Buffer));
         }
 
-        T& operator[] (usize index) 
+        T& operator[] (const usize index) 
         {
             assert(index <= N);
             return Buffer[index];

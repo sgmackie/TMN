@@ -17,7 +17,7 @@ int main()
 	Container::Array<f32, 50> safeArray;
 	safeArray[3] = 6.623;
 
-	Container::DynamicArray<u64> dynamicArray(&memoryArena);
+	Container::DynamicArray<u64> dynamicArray(&memoryArena, 256);
 
 	for (usize i = 0; i < 128; ++i)
 	{
@@ -25,6 +25,8 @@ int main()
 	}
 
 	printf("%llu \n", dynamicArray[89]);
+	printf("%llu \n", dynamicArray[127]);
+	printf("%llu \n", dynamicArray[1]);
 
 	return 0;
 }
