@@ -23,6 +23,11 @@ namespace Container {
             return Buffer.Buffer;
         }
 
+        char* ToCString() const
+        {
+            return Buffer.Buffer;
+        }
+
         DynamicArray<char> Buffer;
     };
 }

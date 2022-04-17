@@ -159,8 +159,10 @@ class Program
 
                     // TODO: Compile each module as a static library to link 
                     string moduleRootPath = new FileInfo(Path.GetFullPath(module)).DirectoryName;
-                    string[] sourceFiles = Directory.GetFiles(moduleRootPath, "*.cpp", SearchOption.AllDirectories);
-                    settings.SourceFiles.AddRange(sourceFiles);
+                    string[] cppSourceFiles = Directory.GetFiles(moduleRootPath, "*.cpp", SearchOption.AllDirectories);
+                    string[] objCSourceFiles = Directory.GetFiles(moduleRootPath, "*.mm", SearchOption.AllDirectories);
+                    settings.SourceFiles.AddRange(cppSourceFiles);
+                    settings.SourceFiles.AddRange(objCSourceFiles);
                     settings.IncludePaths.Add(moduleRootPath);
 
                     // 3rdParty dependencies

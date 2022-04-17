@@ -7,7 +7,11 @@ using namespace Core::Container;
 namespace Core {
 namespace Platform {
 namespace File {
-	void OpenToWrite(String path);
+    // File system
+    bool DirectoryExists(const String directoryPath);
+
+    // File IO
+	void OpenToWrite(const String path);
 }
 }
 }

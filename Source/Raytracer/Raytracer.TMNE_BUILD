@@ -15,6 +15,7 @@
         "MacOS": {
             "Defines": ["-DCORE_PLATFORM_MACOS=1"],
             "General": ["-Wall", "-Werror", "-pedantic", "-Wno-c++11-extensions", "-Wno-static-in-inline", "-lc++"],
+			"Frameworks": ["-framework Foundation", "-framework AppKit", "-framework Cocoa"],
             "Debug": ["-g"]
         }
     }

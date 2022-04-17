@@ -18,7 +18,8 @@
 			"bitset": "cpp",
 			"chrono": "cpp",
 			"unordered_map": "cpp",
-			"algorithm": "cpp"
+			"algorithm": "cpp",
+			"__config": "c"
 		}
 	},
 	"launch": {

@@ -29,9 +29,11 @@ int main()
 	printf("%llu \n", dynamicArray[127]);
 	printf("%llu \n", dynamicArray[1]);
 
-	String filePath(&memoryArena, "TEST");
-	Platform::File::OpenToWrite(filePath);
-	printf("%s", filePath.ToCString());
+	String filePath(&memoryArena, "/Users/sam/Projects/Code/TMN/Bin/Raytracer/");
+	if(Platform::File::DirectoryExists(filePath))
+	{
+		printf("Directory %s exists", filePath.ToCString());
+	}
 
 	return 0;
 }
