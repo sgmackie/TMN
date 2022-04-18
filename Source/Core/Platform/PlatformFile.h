@@ -11,6 +11,7 @@ namespace File {
     bool DirectoryExists(const String directoryPath);
 
     // File IO
+    bool Exists(const String path);
 	void OpenToWrite(const String path);
 }
 }

@@ -18,6 +18,19 @@ namespace File {
         return fileExists;
     }
 
+    bool Exists(const String path)
+    {
+        NSString* sourcePath = CoreStringToNSString(path);
+        BOOL isDirectory;
+        bool fileExists = [[NSFileManager defaultManager] fileExistsAtPath: sourcePath isDirectory: &isDirectory];
+        if (isDirectory)
+        {
+            return false;
+        }
+
+        return fileExists;
+    }
+
 	void OpenToWrite(const String path)
     {
         return;
