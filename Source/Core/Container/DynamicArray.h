@@ -52,6 +52,8 @@ namespace Container {
             }
 
             Buffer = Allocator->AllocateElement<T>(reserveCount);
+            IsHeapAllocated = true;
+            MaxCount = reserveCount;
         }
 
         // Returns the current index
@@ -80,6 +82,22 @@ namespace Container {
             StackBuffer[Count] = object;
             ++Count;
             return Count - 1;
+        }
+
+        void Set(const T* buffer, const usize size)
+        {
+            if (size > MaxCount) {
+                Reserve(size * DYNAMIC_ARRAY_GROWTH_RATE);
+            }
+
+            if (IsHeapAllocated) {
+                memcpy(Buffer, buffer, sizeof(T) * size);
+                Count = size;
+                return;
+            }
+
+            memcpy(&StackBuffer, buffer, sizeof(T) * size);
+            Count = size;
         }
 
         T& operator[] (usize index) 
