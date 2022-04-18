@@ -19,7 +19,13 @@
 			"chrono": "cpp",
 			"unordered_map": "cpp",
 			"algorithm": "cpp",
-			"__config": "c"
+			"__config": "c",
+			"__locale": "cpp",
+			"__string": "cpp",
+			"string": "cpp",
+			"string_view": "cpp",
+			"__tuple": "cpp",
+			"array": "cpp"
 		}
 	},
 	"launch": {

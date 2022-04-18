@@ -20,7 +20,7 @@ typedef f64 double_t;
 #if defined(__OBJC__)
 inline NSString* CoreStringToNSString (const Core::Container::String& string)
 {
-    return [NSString stringWithUTF8String: string.ToCString()];
+    return [NSString stringWithUTF8String: string.ToUTF8()];
 }
 #endif
 

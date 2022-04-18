@@ -5,8 +5,14 @@ using namespace Core::Container;
 
 // TODO: Fix clang-tidy auto save
 
-int main()
+// TODO: Move this to a global string hash table
+static String GApplicationPath(&GAllocator);
+
+int main(int argc, char *argv[])
 {
+	assert(argc == 2);
+	GApplicationPath.Append(&GAllocator, argv[0]);
+
 	Memory::AllocatorArena memoryArena = Memory::AllocatorArena(&GAllocator, Megabytes(4));
 
 	i32 *test = memoryArena.AllocateElement<i32>(8);
@@ -29,11 +35,9 @@ int main()
 	printf("%llu \n", dynamicArray[127]);
 	printf("%llu \n", dynamicArray[1]);
 
-	String filePath(&memoryArena, "/Users/sam/Projects/Code/TMN/Bin/Raytracer/");
-	if(Platform::File::DirectoryExists(filePath))
-	{
-		printf("Directory %s exists", filePath.ToCString());
-	}
+	String utfTest(&memoryArena, argv[1]);
+	char* buffer = utfTest.ToUTF8();
+	printf("%s\n", buffer);
 
 	return 0;
 }
