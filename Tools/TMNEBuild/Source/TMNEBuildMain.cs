@@ -160,15 +160,23 @@ class Program
                     // TODO: Compile each module as a static library to link 
                     string moduleRootPath = new FileInfo(Path.GetFullPath(module)).DirectoryName;
                     string[] cppSourceFiles = Directory.GetFiles(moduleRootPath, "*.cpp", SearchOption.AllDirectories);
-                    string[] objCSourceFiles = Directory.GetFiles(moduleRootPath, "*.mm", SearchOption.AllDirectories);
                     settings.SourceFiles.AddRange(cppSourceFiles);
-                    settings.SourceFiles.AddRange(objCSourceFiles);
+
+                    if (buildPlatform == BuildPlatform.MacOS) {
+                        string[] objCSourceFiles = Directory.GetFiles(moduleRootPath, "*.mm", SearchOption.AllDirectories);
+                        settings.SourceFiles.AddRange(objCSourceFiles);
+                    }
+
                     settings.IncludePaths.Add(moduleRootPath);
 
                     // 3rdParty dependencies
                     JsonArray sourceFileDependencies = moduleNode["Dependencies"]["Files"].AsArray();
                     foreach (var file in sourceFileDependencies)
                     {
+                        if (string.IsNullOrWhiteSpace(file.ToString())) {
+                            continue;
+                        }
+
                         string sourceFilePath = Path.GetFullPath(file.ToString(), rootPath);
                         settings.SourceFiles.Add(sourceFilePath);
                     }
@@ -176,6 +184,10 @@ class Program
                     JsonArray includeFileDependencies = moduleNode["Dependencies"]["Includes"].AsArray();
                     foreach (var include in includeFileDependencies)
                     {
+                        if (string.IsNullOrWhiteSpace(include.ToString())) {
+                            continue;
+                        }
+
                         string includeFilePath = Path.GetFullPath(include.ToString(), rootPath);
                         settings.IncludePaths.Add(includeFilePath);
                     }
@@ -185,7 +197,9 @@ class Program
             // Scan for this project
             string[] projectSourceFiles = Directory.GetFiles(rootPath, "*.cpp", SearchOption.AllDirectories);
             settings.SourceFiles.AddRange(projectSourceFiles);
-            settings.IncludePaths.Add(rootPath);
+            if (!settings.IncludePaths.Exists(x => String.Equals(x, rootPath))) {
+                settings.IncludePaths.Add(rootPath);
+            }
 
             return settings;
         }
@@ -241,8 +255,9 @@ class Program
             string executablePath = Assembly.GetExecutingAssembly().Location;
             executablePath = Path.GetDirectoryName(executablePath);
 
-            string argumentList = "cl";
-            string linkerList = " /link";
+            string argumentList = "";
+            string compiler = "cl";
+            string linkerList = "/link ";
 
             foreach (var flags in buildSettings.CompileFlags)
             {
@@ -250,14 +265,14 @@ class Program
                 {
                     foreach (var flag in flags.Value)
                     {
-                        linkerList += flag;
+                        linkerList += flag + " ";
                     }
                 }
                 else
                 {
                     foreach (var flag in flags.Value)
                     {
-                        argumentList += flag;
+                        argumentList += flag + " ";
                     }
                 }
             }
@@ -267,7 +282,7 @@ class Program
             {
                 string baseOutputPath = buildSettings.OutputPath + Path.DirectorySeparatorChar + buildType.ToString() + Path.DirectorySeparatorChar;
                 Directory.CreateDirectory(baseOutputPath);
-                outputList += " -Fe" + baseOutputPath + buildSettings.Title + ".exe";
+                outputList += "-Fe" + baseOutputPath + buildSettings.Title + ".exe";
                 outputList += " -Fo" + baseOutputPath;
                 outputList += " -Fd" + baseOutputPath + " ";
             }
@@ -281,15 +296,27 @@ class Program
             string includeList = "";
             foreach (string path in buildSettings.IncludePaths)
             {
-                includeList += "-I" + path + " ";
+                string includePath = "-I" + path + " ";
+                includeList += includePath;
             }
+
+            string commandListTotal = compiler + " " + argumentList + outputList + includeList + fileList + linkerList;
 
             LogMessage(LogLevel.Info, buildSettings.Type.ToString() + " " + buildSettings.Title + " (" + buildPlatform.ToString() + " - " + buildType.ToString() + ")");
             LogMessage(LogLevel.Info, argumentList + linkerList);
 
+            // TODO: Find the .git folder to base as the root?
+            string repoRoot = Path.GetFullPath(executablePath + "/../../../");
+            string compileCommandsFile = repoRoot + "compile_flags.txt";
+            File.Delete(compileCommandsFile);
+            var fileHandle = File.Create(compileCommandsFile);
+            string formattedCommandList = String.Join(Environment.NewLine, commandListTotal.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
+            fileHandle.Write(Encoding.UTF8.GetBytes(formattedCommandList), 0, Encoding.UTF8.GetByteCount(formattedCommandList));
+            fileHandle.Close();
+
             Process compilerProcess = new Process();
             compilerProcess.StartInfo.FileName = "cmd.exe";
-            compilerProcess.StartInfo.Arguments = "/c call " + argumentList + outputList + includeList + fileList + linkerList;
+            compilerProcess.StartInfo.Arguments = "/c call " + commandListTotal;
             compilerProcess.StartInfo.UseShellExecute = false;
             compilerProcess.StartInfo.RedirectStandardOutput = true;
             compilerProcess.StartInfo.RedirectStandardError = true;
