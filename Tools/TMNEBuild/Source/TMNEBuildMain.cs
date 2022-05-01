@@ -46,9 +46,10 @@ class Program
             public string Title;
             public string OutputPath;
             public UnitType Type;
-            public Dictionary<string, string[]> CompileFlags;
+            public Dictionary<string, List<string>> CompileFlags;
             public List<string> SourceFiles;
             public List<string> IncludePaths;
+            public List<string> LibFiles;
         }
 
         public void LogMessage(LogLevel level, string text)
@@ -98,7 +99,7 @@ class Program
                 return settings;
             }
 
-            settings.CompileFlags = new Dictionary<string, string[]>();
+            settings.CompileFlags = new Dictionary<string, List<string>>();
             foreach (var flagGroup in compilerFlagGroups)
             {
                 if (flagGroup.Key == "Debug" && buildType == BuildType.Release)
@@ -114,10 +115,10 @@ class Program
                 string[] flagList = new string[flags.Count];
                 for (int i = 0; i < flags.Count; ++i)
                 {
-                    flagList[i] = flags[i].ToString();                   
+                    flagList[i] = flags[i].ToString();        
                 }
 
-                settings.CompileFlags.Add(flagGroup.Key.ToString(), flagList);
+                settings.CompileFlags.Add(flagGroup.Key.ToString(), flagList.ToList());
             }
 
             // Source files
@@ -130,6 +131,7 @@ class Program
             }
 
             settings.SourceFiles = new List<string>();
+            settings.LibFiles = new List<string>();
             settings.IncludePaths = new List<string>();
 
             // Module scanning
@@ -190,6 +192,57 @@ class Program
 
                         string includeFilePath = Path.GetFullPath(include.ToString(), rootPath);
                         settings.IncludePaths.Add(includeFilePath);
+                    }
+
+                    JsonObject moduleCompilerFlagGroups = moduleNode["CompilerFlags"][buildPlatform.ToString()].AsObject();
+                    foreach (var flagGroup in moduleCompilerFlagGroups)
+                    {
+                        JsonArray flags = flagGroup.Value.AsArray();                   
+                        string[] flagList = new string[flags.Count];
+                        for (int i = 0; i < flags.Count; ++i)
+                        {
+                            flagList[i] = flags[i].ToString();
+
+                            // Add Superluminal header and static library
+                            // TODO: Support DLL loading
+                            if (String.Equals(flagList[i], "-DCORE_PROFILER_SUPERLUMINAL=1", StringComparison.OrdinalIgnoreCase)) {
+                                string superluminalPath = Environment.GetEnvironmentVariable("SUPERLUMINAL_API_DIR");
+                                string superluminalInclude = superluminalPath + Path.DirectorySeparatorChar + "include"; 
+                                settings.IncludePaths.Add(superluminalInclude);
+
+                                string superluminalLibName = "";
+                                if (buildType == BuildType.Debug) {
+                                    if (settings.CompileFlags.ContainsKey("Debug")) {
+                                        if (settings.CompileFlags["Debug"].Contains("-MTd")) {
+                                            superluminalLibName = "PerformanceAPI_MTd.lib";
+                                        }
+                                        else if (settings.CompileFlags["Debug"].Contains("-MDd")) {
+                                            superluminalLibName = "PerformanceAPI_MDd.lib";
+                                        }
+                                    }
+                                }
+                                else if (buildType == BuildType.Release) {
+                                    if (settings.CompileFlags.ContainsKey("Release")) {
+                                        if (settings.CompileFlags["Release"].Contains("-MT")) {
+                                            superluminalLibName = "PerformanceAPI_MT.lib";
+                                        }
+                                        else if (settings.CompileFlags["Release"].Contains("-MD")) {
+                                            superluminalLibName = "PerformanceAPI_MD.lib";
+                                        }
+                                    }
+                                }
+
+                                if (!String.IsNullOrEmpty(superluminalLibName)) {
+                                    string superluminalLib = superluminalPath + Path.DirectorySeparatorChar + "lib" + Path.DirectorySeparatorChar + "x64" + Path.DirectorySeparatorChar + superluminalLibName; 
+                                    settings.LibFiles.Add(superluminalLib);
+                                }
+                            } 
+                        }
+
+                        if (settings.CompileFlags.ContainsKey(flagGroup.Key.ToString())) {
+
+                            settings.CompileFlags[flagGroup.Key.ToString()].AddRange(flagList);
+                        }
                     }
                 }
             }
@@ -290,13 +343,18 @@ class Program
             string fileList = "";
             foreach (string file in buildSettings.SourceFiles)
             {
-                fileList += file + " ";
+                fileList += "\"" + file + "\" ";
+            }
+
+            foreach (string file in buildSettings.LibFiles)
+            {
+                fileList += "\"" + file + "\" ";
             }
 
             string includeList = "";
             foreach (string path in buildSettings.IncludePaths)
             {
-                string includePath = "-I" + path + " ";
+                string includePath = "-I\"" + path + "\" ";
                 includeList += includePath;
             }
 

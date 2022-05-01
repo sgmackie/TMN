@@ -5,13 +5,25 @@
 
 namespace Core {
 namespace Container {
-    template<typename T, usize N> 
+    template<typename T, const usize N>
     class Array
     {
     public:
-        Array() 
+        Array()
         {
             Clear();
+        }
+
+        Array(T* buffer) 
+        {
+            assert(buffer != nullptr);
+            memcpy(Buffer, buffer, (sizeof(T) * N));
+        }
+
+        Array(std::initializer_list<T> list) 
+        {
+            assert(list.size() == N);
+            memcpy(Buffer, list.begin(), (sizeof(T) * list.size()));
         }
 
         usize Count() const 
@@ -28,6 +40,13 @@ namespace Container {
         {
             assert(index <= N);
             return Buffer[index];
+        }
+
+        T& operator= (std::initializer_list<T> list);
+
+        T* ToCArray()
+        {
+            return Buffer;
         }
 
         T Buffer[N];

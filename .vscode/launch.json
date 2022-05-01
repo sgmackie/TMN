@@ -9,7 +9,7 @@
             "request": "launch",
             "name": "Launch",
             "program": "${workspaceFolder}/Bin/Raytracer/Debug/Raytracer",
-            "args": ["this string is 結構。"],
+            "args": ["テスト映像.ppm"],
             "cwd": "${workspaceFolder}/Source/"
         }
     ]

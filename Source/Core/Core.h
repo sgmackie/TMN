@@ -6,6 +6,5 @@
 #include "Memory.h"
 #include "Container.h"
 #include "Log.h"
+#include "Profiling.h"
 
-// Global malloc access
-static Core::Memory::AllocatorMalloc GAllocator;

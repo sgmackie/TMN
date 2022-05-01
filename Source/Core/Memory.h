@@ -5,7 +5,8 @@
 
 namespace Core {
 namespace Memory {
-    uptr AlignPointer(uptr pointer, usize alignment);
+    uptr AlignPointer(uptr pointer, const usize alignment);
+    usize GetPointerAlignmentOffset(uptr a, uptr b, const usize alignment);
 }
 }
 

@@ -4,4 +4,5 @@
 #include "Container/Array.h"
 #include "Container/DynamicArray.h"
 #include "Container/String.h"
+#include "Container/Span.h"
 

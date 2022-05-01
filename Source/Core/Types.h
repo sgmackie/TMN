@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <initializer_list>
 
 // Standard integers
 // Unsigned
@@ -27,7 +28,7 @@ typedef float f32;
 typedef double f64;
 
 // Memory model
-typedef size_t usize;
+typedef u64 usize;
 typedef uintptr_t uptr;
 typedef intptr_t iptr;
 
@@ -36,5 +37,9 @@ typedef intptr_t iptr;
 #define Megabytes(value) (Kilobytes(value) * 1024LL)
 #define Gigabytes(value) (Megabytes(value) * 1024LL)
 #define Terabytes(value) (Gigabytes(value) * 1024LL)
-#define ArrayCount(array) (sizeof(array) / sizeof((array)[0]))
 
+// Pointers
+#define AlignPow2(value, alignment) (((value) + ((alignment) - 1)) & ~(((value) - (value)) + (alignment) - 1))
+#define Align4(value) (((value) + 3) & ~3)
+#define Align8(value) (((value) + 7) & ~7)
+#define Align16(value) (((value) + 15) & ~15)

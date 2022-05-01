@@ -4,6 +4,7 @@
 
 #include "Types.h"
 #include "Container/String.h"
+#include "Platform.h"
 
 // Mac includes
 typedef f64 double_t;

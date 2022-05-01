@@ -5,7 +5,7 @@ namespace Core {
 namespace Memory {
     uptr AlignPointer(uptr pointer, usize alignment)
     {
-        if (!Math::IsPow2(alignment)) {
+		if (!Math::IsPowerOfTwo<usize>(alignment)) {
 			return 0;
 		}
 
@@ -16,6 +16,18 @@ namespace Memory {
 
 		uptr alignedPointer = (pointer += alignment - modulo);
 		return alignedPointer;
+    }
+
+    usize GetPointerAlignmentOffset(uptr a, uptr b, const usize alignment)
+    {
+        usize offset = (usize) a + b;
+        usize mask = alignment - 1;
+        if(offset & mask)
+        {
+            return alignment - (offset & mask);
+        }
+    
+        return 0;
     }
 }
 }

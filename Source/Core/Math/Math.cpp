@@ -2,11 +2,10 @@
 
 namespace Core {
 namespace Math {
-    bool IsPow2(u32 value)
-    {
-        return ((value & ~(value - 1)) == value);
-    }
-
+	u32 ConvertSRGBToU32(const ColourSRGB colour)
+	{
+		return (colour.Red << 24) + (colour.Green << 16) + (colour.Blue << 8) + colour.Alpha;
+	}
 }
 }
 

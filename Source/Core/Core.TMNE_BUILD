@@ -2,7 +2,12 @@
 	"Title": "Core",
 	"Type": "Module",
 	"Dependencies": {
-		"Files": ["../../3rdParty/mimalloc/src/static.c"],
-		"Includes": ["../../3rdParty/mimalloc/include"]
+		"Files": [""],
+		"Includes": [""]
+	},
+	"CompilerFlags": {
+		"Windows": {
+			"Defines": ["-DCORE_PROFILER_SUPERLUMINAL=1"]
+		}
 	}
 }

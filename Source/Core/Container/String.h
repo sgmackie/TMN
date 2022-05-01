@@ -19,18 +19,28 @@ namespace Container {
             Append(allocator, stringLiteral);
         }
 
+        String(Memory::Allocator *allocator, const String* string) : Buffer(allocator)
+        {
+            Append(allocator, string->ToUTF8());
+        }
+
         void Append(Memory::Allocator *allocator, const char* stringToAppend)
         {
             usize appendLength = strlen(stringToAppend);
-            usize totalStringLength = Buffer.Count + appendLength;
+            usize totalStringLength = Buffer.Count + appendLength + 1;
 
             // TODO: Provide temporary allocator interface to free after exiting the function scope
-            char* tempBuffer = allocator->AllocateElement<char>(totalStringLength + 1);
-            memcpy(tempBuffer, Buffer.Buffer, sizeof(char) * Buffer.Count);
-            memcpy(tempBuffer + sizeof(char) * Buffer.Count, stringToAppend, sizeof(char) * appendLength);
-            tempBuffer[totalStringLength] = 0;
-            Buffer.Set(tempBuffer, totalStringLength + 1);
-            allocator->Free(tempBuffer, totalStringLength + 1);
+            char* tempBuffer = allocator->AllocateElement<char>(totalStringLength);
+            memcpy(tempBuffer, Buffer.Buffer, Buffer.Count);
+            memcpy(tempBuffer + Buffer.Count, stringToAppend, appendLength);
+            tempBuffer[totalStringLength - 1] = 0;
+            Buffer.Set(tempBuffer, totalStringLength);
+            allocator->Free(tempBuffer, totalStringLength);
+        }
+
+        void Append(Memory::Allocator *allocator, const String* stringToAppend)
+        {
+            Append(allocator, stringToAppend->ToUTF8());
         }
 
         char* ToUTF8() const
@@ -40,6 +50,14 @@ namespace Container {
             }
 
             return nullptr;
+        }
+
+        static String JoinAsPath(Memory::Allocator *allocator, const String *a, const String *b)
+        {
+            String result(allocator, a);
+            result.Append(allocator, "/");
+            result.Append(allocator, b);
+            return result;
         }
 
         Container::DynamicArray<char> Buffer;
