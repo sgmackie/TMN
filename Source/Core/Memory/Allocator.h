@@ -7,6 +7,8 @@ namespace Memory {
 	class Allocator
 	{
 	public:
+		#define ALLOCATOR_DEFAULT_ALIGNMENT 16
+
 		virtual void *Allocate(const usize size, const usize alignment = 0) = 0;
 		virtual void *Reallocate(void *oldPointer, const usize newSize, const usize alignment = 0) = 0;
 		virtual void Free(void *pointer, const usize size = 0) = 0;
@@ -39,7 +41,7 @@ namespace Memory {
 	public:
 		#define ALLOCATOR_GUARD_BLOCK_SIZE Gigabytes(1)
 
-		struct StompAllocationData
+		struct GuardBlock
 		{
 			void *Allocation;
 			usize Size;
@@ -68,6 +70,25 @@ namespace Memory {
 		u8* Block;
 		usize Size;
 		usize Capacity; // In bytes
+		Allocator *Backing;
+	};
+
+	// http://dmitrysoshnikov.com/compilers/writing-a-pool-allocator/
+	class AllocatorPool : public Allocator
+	{
+	public:
+		struct PoolBlock
+		{
+			PoolBlock *NextBlock;
+		};
+
+		AllocatorPool(Allocator *allocator, const usize blockSize);
+		void *Allocate(const usize size, const usize alignment = 0) override;
+		void *Reallocate(void *oldPointer, const usize oldSize, const usize alignment = 0) override;
+		void Free(void *pointer, const usize size = 0) override;
+
+		usize BlockSize;
+		PoolBlock *CurrentBlock;
 		Allocator *Backing;
 	};
 }

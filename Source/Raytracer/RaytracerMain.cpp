@@ -6,6 +6,14 @@ using namespace Core::Container;
 // TODO: Fix clang-tidy auto save
 // TODO: assert with message and call stack
 
+struct PoolData
+{
+	Array<f32, 2> points;
+	i32 handle;
+	u64 flag;
+};
+
+
 void Run(Memory::Allocator *allocator)
 {
 	PROFILER_EVENT_START("Run", Math::ColourSRGB(255, 0, 0))
@@ -37,6 +45,19 @@ void Run(Memory::Allocator *allocator)
 	for (const i32 n : spanA) {
 		printf("%d\n", n);
 	}
+
+	Memory::AllocatorPool poolAllocator(&programAllocator, sizeof(PoolData));
+	PoolData* dataAllocation = (PoolData*) poolAllocator.Allocate(64);
+	Span<PoolData> poolBlock(dataAllocation, 64);
+
+	for (PoolData &pd : poolBlock) {
+		pd.points[0] = 124;
+		pd.points[1] = 3124;
+		f32 result = pd.points[0] + pd.points[1];
+		printf("%f\n", result);
+	}
+
+	poolAllocator.Free(dataAllocation);
 
 	// GApplicationPath.Append(allocator, argv[0]);
 	// String testFile = String(allocator, argv[1]);

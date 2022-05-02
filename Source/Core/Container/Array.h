@@ -33,7 +33,7 @@ namespace Container {
 
         void Clear()
         {
-            memset(Buffer, 0, sizeof(Buffer));
+			memset(Buffer, 0, (sizeof(T) * N));
         }
 
         T& operator[] (const usize index) 
@@ -48,6 +48,16 @@ namespace Container {
         {
             return Buffer;
         }
+
+		T* begin()
+		{
+			return Buffer;
+		}
+
+		T* end()
+		{
+			return Buffer + N;
+		}
 
         T Buffer[N];
     };

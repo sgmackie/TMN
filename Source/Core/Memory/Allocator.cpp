@@ -39,11 +39,9 @@ namespace Memory {
 
 	void *AllocatorVirtualGuard::Allocate(const usize size, const usize alignment)
 	{
-
-
-		const usize actualAlignment = Max(alignment, 16);
+		const usize actualAlignment = Max(alignment, ALLOCATOR_DEFAULT_ALIGNMENT);
 		const usize alignedSize = Math::Align(size, actualAlignment);
-		const usize allocationSize = (alignedSize + sizeof(StompAllocationData)) + (PageSize - 1) & ~(PageSize - 1U);
+		const usize allocationSize = (alignedSize + sizeof(GuardBlock)) + (PageSize - 1) & ~(PageSize - 1U);
 		const usize alignedAllocationSize = allocationSize + PageSize;
 
 		void* allocation = nullptr;
@@ -63,12 +61,12 @@ namespace Memory {
 		VirtualOffset += alignedAllocationSize;
 
 		void *result = reinterpret_cast<void*>(reinterpret_cast<u8*>(allocation) + allocationSize - alignedSize);
-		const StompAllocationData stompData = { allocation, alignedAllocationSize, alignedSize };
+		const GuardBlock guardData = { allocation, alignedAllocationSize, alignedSize };
 		
 		Platform::VirtualMemoryCommit(allocation, allocationSize, Platform::VirtualMemoryFlags::ReadWrite);
 
-		StompAllocationData* stompDataPointer = reinterpret_cast<StompAllocationData*>(reinterpret_cast<u8*>(result) - sizeof(StompAllocationData));
-		*stompDataPointer = stompData;
+		GuardBlock* guardDataAllocation = reinterpret_cast<GuardBlock*>(reinterpret_cast<u8*>(result) - sizeof(GuardBlock));
+		*guardDataAllocation = guardData;
 
 		return result;
 	}
@@ -77,8 +75,8 @@ namespace Memory {
 	{
 		assert(oldPointer != nullptr);
 		void *result = Allocate(newSize, alignment);
-		StompAllocationData* stompDataPointer = reinterpret_cast<StompAllocationData*>(reinterpret_cast<u8*>(oldPointer) - sizeof(StompAllocationData));
-		memcpy(result, oldPointer, Min(stompDataPointer->RequestedSize, newSize));
+		GuardBlock* guardData = reinterpret_cast<GuardBlock*>(reinterpret_cast<u8*>(oldPointer) - sizeof(GuardBlock));
+		memcpy(result, oldPointer, Min(guardData->RequestedSize, newSize));
 		Free(oldPointer);
 		return result;
 	}
@@ -87,10 +85,10 @@ namespace Memory {
 	{
 		assert(pointer != nullptr);
 
-		StompAllocationData *stompDataPointer = reinterpret_cast<StompAllocationData*>(pointer);
-		stompDataPointer--;
+		GuardBlock *guardData = reinterpret_cast<GuardBlock*>(pointer);
+		guardData--;
 
-		Platform::VirtualMemoryDecommit(stompDataPointer->Allocation, stompDataPointer->Size);
+		Platform::VirtualMemoryDecommit(guardData->Allocation, guardData->Size);
 	}
 
 	AllocatorLinear::AllocatorLinear(Allocator *allocator, const usize capacity)
@@ -98,7 +96,7 @@ namespace Memory {
 		assert(allocator != nullptr);
 		Backing = allocator;
 
-		Block = reinterpret_cast<u8*>(Backing->Allocate(sizeof(u8) * capacity, 16)); // TODO: Safe alignment?
+		Block = reinterpret_cast<u8*>(Backing->Allocate(sizeof(u8) * capacity, ALLOCATOR_DEFAULT_ALIGNMENT));
 		assert(Block != nullptr);
 		Size = 0;
 		Capacity = Math::Align<usize>(capacity, 16);
@@ -112,12 +110,14 @@ namespace Memory {
 		Capacity = 0;
 	}
 
+	// TODO: Worth splitting the block in two and having two offsets that meet in the middle?
+	// "Frame-Based Memory Allocation in Game Programming Gems" as example
 	void *AllocatorLinear::Allocate(const usize size, const usize alignment)
 	{
-		usize allocationSize = Math::RoundUpToPower<usize>(size, 16);
+		const usize actualAlignment = Max(alignment, ALLOCATOR_DEFAULT_ALIGNMENT);
+		usize allocationSize = Math::RoundUpToPower<usize>(size, actualAlignment);
 		assert((allocationSize + Size) <= Capacity);
 		
-		// TODO: Remove the capacity and split each allocation into a seperate block
 		void* allocation = Block + Size;
 		Size += allocationSize;
 		return allocation;
@@ -133,6 +133,49 @@ namespace Memory {
 	{
 		Size = 0;
 		memset(Block, 0, sizeof(u8) * Capacity);
+	}
+
+	AllocatorPool::AllocatorPool(Allocator *allocator, const usize blockSize)
+	{
+		BlockSize = blockSize;
+		CurrentBlock = nullptr;
+		Backing = allocator;
+	}
+
+	void *AllocatorPool::Allocate(const usize size, const usize alignment)
+	{
+		if (CurrentBlock == nullptr) {
+			const usize allocationSize = BlockSize * size;
+			const usize alignedSize= Math::RoundUpToPower<usize>(allocationSize, ALLOCATOR_DEFAULT_ALIGNMENT);
+
+			PoolBlock *startingBlock = reinterpret_cast<PoolBlock*>(Backing->Allocate(alignedSize)); 
+			PoolBlock *block = startingBlock;
+ 
+			for (usize i = 0; i < BlockSize - 1; ++i) {
+				block->NextBlock = reinterpret_cast<PoolBlock*>(reinterpret_cast<PoolBlock*>(block) + size);
+				block = block->NextBlock;
+			}
+ 
+			block->NextBlock = nullptr;
+			CurrentBlock = startingBlock;
+		}
+
+		PoolBlock *result = CurrentBlock;
+		CurrentBlock = CurrentBlock->NextBlock;
+		return result;
+	}
+	
+	void *AllocatorPool::Reallocate(void *oldPointer, const usize newSize, const usize alignment)
+	{
+		assert(false);
+		return nullptr;
+	}
+	
+	void AllocatorPool::Free(void *pointer, const usize size)
+	{
+		reinterpret_cast<PoolBlock*>(pointer)->NextBlock = CurrentBlock;
+		CurrentBlock = reinterpret_cast<PoolBlock*>(pointer);
+		return;
 	}
 }
 }

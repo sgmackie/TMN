@@ -37,6 +37,8 @@ namespace Math {
 	}
 
 	// TODO: Convert to union of array/u32 value?
+	// TODO: Support linear colours https://entropymine.com/imageworsener/srgbformula/
+	// TODO: Linear colour with u8 conversion https://gist.github.com/rygorous/2203834
 	struct ColourSRGB
 	{
 		u8 Red;
