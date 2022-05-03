@@ -26,8 +26,15 @@ namespace Memory {
 		}
 	};
 
-	// TODO: Write custom binned allocator http://dmitrysoshnikov.com/compilers/writing-a-memory-allocator/#custom-sbrk
 	class AllocatorMalloc : public Allocator
+	{
+	public:
+		void *Allocate(const usize size, const usize alignment = 0) override;
+		void *Reallocate(void *oldPointer, const usize oldSize, const usize alignment = 0) override;
+		void Free(void *pointer, const usize size = 0) override;
+	};
+
+	class AllocatorMiMalloc : public Allocator
 	{
 	public:
 		void *Allocate(const usize size, const usize alignment = 0) override;

@@ -71,17 +71,13 @@ int main(int argc, char *argv[])
 {
 	assert(argc == 2);
 
-#if defined(CORE_ALLOCATOR_USE_VIRTUALGUARD)
-	Memory::AllocatorVirtualGuard *gAllocator = new Memory::AllocatorVirtualGuard();
-#else
-	Memory::AllocatorMalloc gAllocator;
-#endif
-
 	PROFILER_THREAD_ID("Main")
 
-	Run(gAllocator);
+	Memory::Allocator *mainAllocator = Core::Startup(Core::GlobalAllocatorType::MiMalloc);
+
+	Run(mainAllocator);
 		
-	delete gAllocator;
+	Core::Shutdown(mainAllocator);
 
 	return 0;
 }

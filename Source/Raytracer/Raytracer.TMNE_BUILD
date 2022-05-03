@@ -6,7 +6,7 @@
 	"Modules": ["Core"],
 	"CompilerFlags": {
 		"Windows": {
-			"Defines": ["-DCORE_PLATFORM_WINDOWS=1", "-DCORE_ALLOCATOR_USE_VIRTUALGUARD=1"],
+			"Defines": ["-DCORE_PLATFORM_WINDOWS=1"],
 			"General": ["-nologo", "-diagnostics:column", "-std:c++17", "-WX", "-WL", "-FC", "-Wv:18"],
 			"Debug": ["-Od", "-MTd", "-Zi"],
 			"Release": ["-O2", "-MT", "-Zi"],

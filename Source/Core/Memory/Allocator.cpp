@@ -1,9 +1,7 @@
 #include "Memory.h"
 #include "Platform.h"
-#include "Math.h"
-
-// References:
-// https://hero.handmade.network/episode/code/day345/#809
+#include "Maths.h"
+#include "mimalloc.h"
 
 namespace Core {
 namespace Memory {
@@ -28,6 +26,31 @@ namespace Memory {
 	void AllocatorMalloc::Free(void *pointer, const usize size)
 	{
 		free(pointer);
+	}
+
+	void *AllocatorMiMalloc::Allocate(const usize size, const usize alignment)
+	{
+		const usize actualAlignment = Max(alignment, ALLOCATOR_DEFAULT_ALIGNMENT);
+		void *result = mi_malloc_aligned(size, actualAlignment);
+#if defined(CORE_MEMORY_ZERO_INITIALISE)
+		memset(result, 0, size);
+#endif
+		return result;
+	}
+	
+	void *AllocatorMiMalloc::Reallocate(void *oldPointer, const usize newSize, const usize alignment)
+	{
+		const usize actualAlignment = Max(alignment, ALLOCATOR_DEFAULT_ALIGNMENT);
+		void *result = mi_realloc_aligned(oldPointer, newSize, actualAlignment);
+#if defined(CORE_MEMORY_ZERO_INITIALISE)
+		memset(result, 0, newSize);
+#endif
+		return result;
+	}
+	
+	void AllocatorMiMalloc::Free(void *pointer, const usize size)
+	{
+		mi_free(pointer);
 	}
 
 	AllocatorVirtualGuard::AllocatorVirtualGuard()
@@ -120,6 +143,10 @@ namespace Memory {
 		
 		void* allocation = Block + Size;
 		Size += allocationSize;
+
+#if defined(CORE_MEMORY_ZERO_INITIALISE)
+		memset(allocation, 0, Size);
+#endif
 		return allocation;
 	}
 	
@@ -132,7 +159,10 @@ namespace Memory {
 	void AllocatorLinear::Free(void *pointer, const usize size)
 	{
 		Size = 0;
+
+#if defined(CORE_MEMORY_ZERO_INITIALISE)
 		memset(Block, 0, sizeof(u8) * Capacity);
+#endif
 	}
 
 	AllocatorPool::AllocatorPool(Allocator *allocator, const usize blockSize)
