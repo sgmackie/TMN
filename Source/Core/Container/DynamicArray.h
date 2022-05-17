@@ -11,25 +11,27 @@ namespace Container {
     class DynamicArray
     {
     public:
-        #define DYNAMIC_ARRAY_MAX_STACK_ELEMENTS 16 // TODO: Double check this size
-        #define DYNAMIC_ARRAY_GROWTH_RATE 1.5
+        #define DYNAMIC_ARRAY_MAX_STACK_ELEMENTS 8
+        #define DYNAMIC_ARRAY_GROWTH_RATE 1.2
 
         DynamicArray(Memory::Allocator *allocator, const usize reserveCount = 0)
         {
             Count = 0;
             Capacity = DYNAMIC_ARRAY_MAX_STACK_ELEMENTS;
-            Buffer = StackBuffer.Buffer;
+            Buffer = StackBuffer;
             Allocator = allocator;
 
+#if defined(CORE_MEMORY_ZERO_INITIALISE)
+			memset(StackBuffer, 0, sizeof(T) * Capacity);
+#endif
             if (reserveCount > 0) {
-                Reserve(reserveCount);
+				Reserve(reserveCount);
             }
         }
 
         ~DynamicArray()
         {
-            Clear();
-            if (Buffer != StackBuffer.Buffer) {
+			if (IsDynamicallyAllocated()) {
                 Allocator->Free(Buffer);
                 Buffer = nullptr;
             }
@@ -45,24 +47,16 @@ namespace Container {
                 return;
             }
 
-            if (Buffer == StackBuffer.Buffer && Count < DYNAMIC_ARRAY_MAX_STACK_ELEMENTS) {
-                return;
+			T* TempBuffer = reinterpret_cast<T*>(Allocator->Allocate(sizeof(T) * reserveCount));
+			memcpy(TempBuffer, Buffer, sizeof(T) * Count);
+			if (!IsDynamicallyAllocated()) {
+				Buffer = TempBuffer;
             }
-            
-            T* TempBuffer = Allocator->AllocateElement<T>(reserveCount);
-			for (usize i = 0; i < Count; ++i)
-			{
-				TempBuffer[i] = Buffer[i];
-                Buffer[i].~T();
-            }
+			else {
+				Allocator->Free(Buffer);
+				Buffer = TempBuffer;
+			}
 
-            // Don't free if previously using the stack buffer
-            if (Buffer != StackBuffer.Buffer) {
-                StackBuffer.Clear();
-                Allocator->Free(Buffer);
-            }
-
-            Buffer = TempBuffer;
             Capacity = reserveCount;
         }
 
@@ -78,9 +72,18 @@ namespace Container {
             return Count - 1;
         }
 
+		void Append(const T* buffer, const usize size)
+		{
+			Reserve((Capacity + size) * DYNAMIC_ARRAY_GROWTH_RATE);
+			for (usize i = 0; i < size; ++i) {
+				Buffer[Count + i] = buffer[i];
+			}
+			Count += size;
+		}
+
 		void RemoveAt(const usize index)
 		{
-			assert(index >= 0 && index < Count);
+			assert(index >= 0 && index <= Count);
             Buffer[index].~T();
             Buffer[index] = 0;
             --Count;
@@ -89,7 +92,7 @@ namespace Container {
         void Set(const T* buffer, const usize size)
         {
             if (size > Capacity) {
-                Reserve(size * DYNAMIC_ARRAY_GROWTH_RATE);
+                Reserve(size);
             }
 
 			for (usize i = 0; i < size; ++i)
@@ -104,11 +107,6 @@ namespace Container {
 		{
 			Count = 0;
 
-            if (Buffer == StackBuffer.Buffer) {
-                StackBuffer.Clear();
-                return;
-            }
-
 			for (usize i = 0; i < Count; ++i) {
                 Buffer[i].~T();
                 Buffer[i] = 0;
@@ -121,10 +119,46 @@ namespace Container {
             return Buffer[index];
         }
 
+		const T& operator[] (const usize index) const
+		{
+			assert(index <= (Count - 1));
+			return Buffer[index];
+		}
+
+		T* begin()
+		{
+			return &Buffer[0];
+		}
+
+		T* end()
+		{
+			return &Buffer[Count];
+		}
+
+		const T* begin() const
+		{
+			return &Buffer[0];
+		}
+
+		const T* end() const
+		{
+			return &Buffer[Count];
+		}
+
+		bool IsDynamicallyAllocated() const
+		{
+			return Buffer != StackBuffer;
+		}
+
+		usize SizeInBytes() const
+		{
+			return sizeof(T) * Count;
+		}
+
         usize Count;
         usize Capacity;
-        T *Buffer;
-        Array<T, DYNAMIC_ARRAY_MAX_STACK_ELEMENTS> StackBuffer;
+		T StackBuffer[DYNAMIC_ARRAY_MAX_STACK_ELEMENTS];
+		T* Buffer;
         Memory::Allocator *Allocator;
     };
 }

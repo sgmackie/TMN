@@ -158,11 +158,12 @@ namespace Memory {
 	
 	void AllocatorLinear::Free(void *pointer, const usize size)
 	{
-		Size = 0;
+	}
 
-#if defined(CORE_MEMORY_ZERO_INITIALISE)
+	void AllocatorLinear::Reset()
+	{
+		Size = 0;
 		memset(Block, 0, sizeof(u8) * Capacity);
-#endif
 	}
 
 	AllocatorPool::AllocatorPool(Allocator *allocator, const usize blockSize)
@@ -170,6 +171,14 @@ namespace Memory {
 		BlockSize = blockSize;
 		CurrentBlock = nullptr;
 		Backing = allocator;
+	}
+
+	AllocatorPool::~AllocatorPool()
+	{
+		if (CurrentBlock != nullptr) {
+			Backing->Free(CurrentBlock);
+		}
+		Backing = nullptr;
 	}
 
 	void *AllocatorPool::Allocate(const usize size, const usize alignment)

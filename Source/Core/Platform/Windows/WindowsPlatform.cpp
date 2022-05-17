@@ -53,6 +53,19 @@ namespace Platform {
 			BOOL result = VirtualProtect(pointer, size, PAGE_NOACCESS, 0);
 			assert(result);
 		}
+
+		const char* GetLastSystemError(Memory::Allocator *allocator)
+		{
+			wchar_t *utf16 = NULL;
+			const DWORD errorCode = GetLastError();
+			const DWORD stringLength = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR) &utf16, 0, NULL);
+			
+			// TODO: Use temp memory
+			char *utf8 = Unicode::UTF16ToUTF8(allocator, (const u16*) utf16);
+			LocalFree(utf16);
+
+			return utf8;
+		}
 }
 }
 

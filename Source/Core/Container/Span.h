@@ -51,6 +51,8 @@ namespace Container {
             return End;
         }
 
+		// TODO: Use a single pointer with an offset instead
+		// TODO: Support indexing offsets
 	    T* Start;
 	    T* End;
     };

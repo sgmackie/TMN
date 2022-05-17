@@ -42,21 +42,32 @@ namespace Container {
             return Buffer[index];
         }
 
-        T& operator= (std::initializer_list<T> list);
+		const T& operator[] (const usize index) const
+		{
+			assert(index <= N);
+			return Buffer[index];
+		}
 
-        T* ToCArray()
-        {
-            return Buffer;
-        }
+        T& operator= (std::initializer_list<T> list);
 
 		T* begin()
 		{
-			return Buffer;
+			return &Buffer[0];
 		}
 
 		T* end()
 		{
-			return Buffer + N;
+			return &Buffer[N-1];
+		}
+
+		const T* begin() const
+		{
+			return &Buffer[0];
+		}
+
+		const T* end() const
+		{
+			return &Buffer[N-1];
 		}
 
         T Buffer[N];

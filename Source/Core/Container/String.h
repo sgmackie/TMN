@@ -3,45 +3,104 @@
 #include "Types.h"
 #include "DynamicArray.h"
 #include "Memory/Allocator.h"
-#include "Platform/PlatformUnicode.h"
+#include "Platform.h"
+
+#define STB_SPRINTF_IMPLEMENTATION
+#include "stb_sprintf.h"
 
 namespace Core {
 namespace Container {
     class String
     {
     public:
-        String(Memory::Allocator *allocator) : Buffer(allocator)
+		#define STRING_FORMAT_BUFFER 512
+
+		String(Memory::Allocator *allocator, const usize reserveSize = 0) : Buffer(allocator, reserveSize)
         {
+			Buffer.Add('\0');
         }
 
-        String(Memory::Allocator *allocator, const char* stringLiteral) : Buffer(allocator)
-        {
-            Append(allocator, stringLiteral);
-        }
+		String(Memory::Allocator *allocator, const char* stringLiteral, const usize length) : Buffer(allocator, length)
+		{
+			Buffer.Set(stringLiteral, length);
+			Buffer.Add('\0');
+		}
 
-        String(Memory::Allocator *allocator, const String* string) : Buffer(allocator)
-        {
-            Append(allocator, string->ToUTF8());
-        }
+		String(Memory::Allocator *allocator, const char* stringLiteral) : Buffer(allocator)
+		{
+			Buffer.Set(stringLiteral, strlen(stringLiteral));
+			Buffer.Add('\0');
+		}
 
-        void Append(Memory::Allocator *allocator, const char* stringToAppend)
-        {
-            usize appendLength = strlen(stringToAppend);
-            usize totalStringLength = Buffer.Count + appendLength + 1;
+		~String()
+		{
+		}
 
-            // TODO: Provide temporary allocator interface to free after exiting the function scope
-            char* tempBuffer = allocator->AllocateElement<char>(totalStringLength);
-            memcpy(tempBuffer, Buffer.Buffer, Buffer.Count);
-            memcpy(tempBuffer + Buffer.Count, stringToAppend, appendLength);
-            tempBuffer[totalStringLength - 1] = 0;
-            Buffer.Set(tempBuffer, totalStringLength);
-            allocator->Free(tempBuffer, totalStringLength);
-        }
+		void Append(const char character)
+		{
+			Append(&character, 1);
+		}
 
-        void Append(Memory::Allocator *allocator, const String* stringToAppend)
-        {
-            Append(allocator, stringToAppend->ToUTF8());
-        }
+		void Append(const char* stringLiteral)
+		{
+			Append(stringLiteral, strlen(stringLiteral));
+		}
+
+		void Append(const char* stringLiteral, const usize length)
+		{
+			if (IsNullTerminated() && Length() > 0) {
+				Buffer.RemoveAt(Buffer.Count - 1);
+			}
+
+			Buffer.Append(stringLiteral, length);
+			Buffer.Add('\0');
+		}
+
+		void AppendAsPath(const char* stringLiteral)
+		{
+			Append(Platform::FileIO::GetPathSeperator());
+			Append(stringLiteral);
+		}
+	
+		void AppendAsPath(const String* input)
+		{
+			AppendAsPath(input->ToUTF8());
+		}
+
+		void AppendFormat(const char *format, ...)
+		{
+			va_list args;
+			va_start(args, format);
+			char tempBuffer[STRING_FORMAT_BUFFER]; // TODO: Handle cases bigger than 512
+			usize charactersWritten = stbsp_vsnprintf(tempBuffer, STRING_FORMAT_BUFFER, format, args);
+			va_end(args);
+			
+			if ((Length() + charactersWritten) > Buffer.Capacity) {
+				Buffer.Reserve(Buffer.Capacity + charactersWritten);
+			}
+
+			if (IsNullTerminated() && Length() > 0) {
+				Buffer.RemoveAt(Buffer.Count - 1);
+			}
+
+			memmove(Buffer.Buffer + Length(), tempBuffer, sizeof(char) * charactersWritten);
+			Buffer.Count += charactersWritten;
+			Buffer.Add('\0');
+		}
+
+		void Trim(const usize count)
+		{
+			if (IsNullTerminated() && Length() > 0) {
+				Buffer.RemoveAt(Buffer.Count - 1);
+			}
+
+			const usize originalSize = Buffer.Count;
+			for (usize i = 0; i < count; ++i) {
+				Buffer.RemoveAt(originalSize - i);
+			}
+
+			Buffer.Add('\0');
+		}
 
         char* ToUTF8() const
         {
@@ -52,13 +111,30 @@ namespace Container {
             return nullptr;
         }
 
-        static String JoinAsPath(Memory::Allocator *allocator, const String *a, const String *b)
-        {
-            String result(allocator, a);
-            result.Append(allocator, "/");
-            result.Append(allocator, b);
-            return result;
-        }
+		void Clear()
+		{
+			Buffer.Clear();
+		}
+
+		bool IsNullTerminated() const
+		{
+			return Buffer.Buffer[Length()] == 0 ? true : false;
+		}
+
+		usize Length() const
+		{
+			return Buffer.Count;
+		}
+
+		usize SizeInBytes() const
+		{
+			return Buffer.SizeInBytes();
+		}
+
+		static u64 ToU64(char *string, const u8 base = 10)
+		{
+			return strtoull(string, 0, base);
+		}
 
         Container::DynamicArray<char> Buffer;
     };

@@ -12,6 +12,7 @@
 #include <windows.h>
 
 // Libs
+#pragma comment(lib, "Kernel32.lib")
 #pragma comment(lib, "Advapi32.lib")
 
 

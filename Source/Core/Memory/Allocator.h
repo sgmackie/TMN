@@ -73,7 +73,10 @@ namespace Memory {
 		void *Allocate(const usize size, const usize alignment = 0) override;
 		void *Reallocate(void *oldPointer, const usize oldSize, const usize alignment = 0) override;
 		void Free(void *pointer, const usize size = 0) override;
+		void Reset();
 
+		// TODO: Add temporary allocator that can roll back the size (offset)
+			
 		u8* Block;
 		usize Size;
 		usize Capacity; // In bytes
@@ -90,6 +93,7 @@ namespace Memory {
 		};
 
 		AllocatorPool(Allocator *allocator, const usize blockSize);
+		~AllocatorPool();
 		void *Allocate(const usize size, const usize alignment = 0) override;
 		void *Reallocate(void *oldPointer, const usize oldSize, const usize alignment = 0) override;
 		void Free(void *pointer, const usize size = 0) override;

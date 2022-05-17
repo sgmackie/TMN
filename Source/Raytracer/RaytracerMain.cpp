@@ -2,83 +2,85 @@
 
 using namespace Core;
 using namespace Core::Container;
+using namespace Core::Math;
 
 // TODO: Fix clang-tidy auto save
-// TODO: assert with message and call stack
+// TODO: assert with message and call stack https://github.com/JochenKalmbach/StackWalker
+// TODO: Add custom std::move https://www.foonathan.net/2020/09/move-forward/
 
-struct PoolData
+
+void RenderImage(Memory::AllocatorLinear *frameAllocator, String* fileBuffer, const usize width, const usize height)
 {
-	Array<f32, 2> points;
-	i32 handle;
-	u64 flag;
-};
+	PROFILER_EVENT_START("RenderImage", Colour::SRGBA(255, 0, 0))
 
+	fileBuffer->Clear();
+	fileBuffer->Append("P3\n");
+	fileBuffer->AppendFormat("%d %d\n", width, height);
+	fileBuffer->Append("255\n");
 
-void Run(Memory::Allocator *allocator)
+	DynamicArray<Colour::SRGBA> colours(frameAllocator, width * height);
+
+	for (usize i = 0; i < width * height; ++i) {
+		colours.Add(Colour::SRGBA(255, 0, 0));
+	}
+
+	for (const Colour::SRGBA& colour : colours) {
+		fileBuffer->AppendFormat("%u %u %u\t", colour.Red, colour.Green, colour.Blue);
+	}
+
+	Vector3 cast = Math::RayCast(Vector3(), Vector3(50, 0, 0), 0.13f);
+
+	fileBuffer->Append("\n");
+
+	frameAllocator->Reset();
+
+	PROFILER_EVENT_STOP()
+}
+
+void Run(Memory::Allocator *allocator, char **arguments)
 {
-	PROFILER_EVENT_START("Run", Math::ColourSRGB(255, 0, 0))
+	PROFILER_EVENT_START("Run", Colour::SRGBA(255, 0, 0))
 
-	f64 *stompBlock = allocator->AllocateElement<f64>(512);
-	stompBlock[341] = 3141242135;
-	allocator->Free(stompBlock);
+	String testFilePath(allocator, arguments[0]);
+	testFilePath.Trim(14);
+	testFilePath.AppendAsPath(arguments[1]);
+	printf("%s\n", testFilePath.ToUTF8());
 
-	Memory::AllocatorLinear programAllocator(allocator, Megabytes(4));
-	i32 *blocktrt = (i32 *) programAllocator.Allocate(sizeof(i32) * 9);
-	blocktrt[4] = 3124;
-	blocktrt[13] = 214;
-	printf("%d\n", blocktrt[4]);
-	programAllocator.Free(blocktrt);
-
-	DynamicArray<float> testArray(&programAllocator);
-	for (usize i = 0; i < 8; ++i) {
-		testArray.Add(i);
+	Platform::File testFile;
+	if (Platform::FileIO::Exists(allocator, testFilePath.ToUTF8())) {
+		Platform::FileIO::Remove(allocator, testFilePath.ToUTF8());
 	}
 
-	testArray.RemoveAt(2);
-	testArray.Clear();
-
-	i32 *spanTest = programAllocator.AllocateElement<i32>(8);
-	Span<i32> spanA(spanTest, 4);
-	spanTest[7] = 55;
-	spanA[3] = 44;
-
-	for (const i32 n : spanA) {
-		printf("%d\n", n);
+	if (!Platform::FileIO::CreateToWrite(allocator, testFilePath.ToUTF8(), &testFile)) {
+		return;
 	}
 
-	Memory::AllocatorPool poolAllocator(&programAllocator, sizeof(PoolData));
-	PoolData* dataAllocation = (PoolData*) poolAllocator.Allocate(64);
-	Span<PoolData> poolBlock(dataAllocation, 64);
+	const usize imageWidth = String::ToU64(arguments[2]);
+	const usize imageHeight = String::ToU64(arguments[3]);
+	const usize bufferSize = ((4 * 3 + 2) * (imageWidth * imageHeight)) + 16;
+	String fileBuffer(allocator, bufferSize);
+	Memory::AllocatorLinear* frameAllocator = new(allocator) Memory::AllocatorLinear(allocator, Megabytes(64));
+	RenderImage(frameAllocator, &fileBuffer, imageWidth, imageHeight);
 
-	for (PoolData &pd : poolBlock) {
-		pd.points[0] = 124;
-		pd.points[1] = 3124;
-		f32 result = pd.points[0] + pd.points[1];
-		printf("%f\n", result);
-	}
+	Platform::FileIO::Write(allocator, &testFile, (u8*) fileBuffer.ToUTF8(), fileBuffer.SizeInBytes());
+	Platform::FileIO::Close(&testFile);
 
-	poolAllocator.Free(dataAllocation);
-
-	// GApplicationPath.Append(allocator, argv[0]);
-	// String testFile = String(allocator, argv[1]);
-	// String testFilePath = String::JoinAsPath(allocator, &GApplicationPath, &testFile);
-	// printf("%s", testFilePath.ToUTF8());
+	operator::delete(frameAllocator, allocator);
 
 	PROFILER_EVENT_STOP()
 }
 
 int main(int argc, char *argv[])
 {
-	assert(argc == 2);
+	assert(argc == 4);
 
 	PROFILER_THREAD_ID("Main")
 
 	Memory::Allocator *mainAllocator = Core::Startup(Core::GlobalAllocatorType::MiMalloc);
 
-	Run(mainAllocator);
+	Run(mainAllocator, argv);
 		
 	Core::Shutdown(mainAllocator);
 
 	return 0;
 }
-

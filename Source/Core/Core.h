@@ -3,6 +3,7 @@
 #include "Types.h"
 #include "Platform.h"
 #include "Maths.h"
+#include "Colour.h"
 #include "Memory.h"
 #include "Container.h"
 #include "Log.h"
@@ -33,4 +34,14 @@ namespace Core {
 	{
 		delete globalAllocator;
 	}
+}
+
+void *operator new(const size_t size, Core::Memory::Allocator* allocator)
+{
+	return allocator->Allocate(size);
+}
+ 
+void operator delete(void *pointer, Core::Memory::Allocator* allocator)
+{
+	allocator->Free(pointer);
 }

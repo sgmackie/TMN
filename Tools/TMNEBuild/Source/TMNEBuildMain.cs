@@ -311,6 +311,7 @@ class Program
             string argumentList = "";
             string compiler = "cl";
             string linkerList = "/link ";
+            string formattedCommandList = "";
 
             foreach (var flags in buildSettings.CompileFlags)
             {
@@ -319,6 +320,7 @@ class Program
                     foreach (var flag in flags.Value)
                     {
                         linkerList += flag + " ";
+                        formattedCommandList += flag + " \n";
                     }
                 }
                 else
@@ -326,6 +328,7 @@ class Program
                     foreach (var flag in flags.Value)
                     {
                         argumentList += flag + " ";
+                        formattedCommandList += flag + " \n";
                     }
                 }
             }
@@ -338,17 +341,23 @@ class Program
                 outputList += "-Fe" + baseOutputPath + buildSettings.Title + ".exe";
                 outputList += " -Fo" + baseOutputPath;
                 outputList += " -Fd" + baseOutputPath + " ";
+
+                formattedCommandList += "-Fe" + baseOutputPath + buildSettings.Title + ".exe" + " \n";
+                formattedCommandList += "-Fo" + baseOutputPath + " \n";
+                formattedCommandList += "-Fd" + baseOutputPath  + " \n";
             }
 
             string fileList = "";
             foreach (string file in buildSettings.SourceFiles)
             {
                 fileList += "\"" + file + "\" ";
+                formattedCommandList += "\"" + file + "\" " + " \n";
             }
 
             foreach (string file in buildSettings.LibFiles)
             {
                 fileList += "\"" + file + "\" ";
+                formattedCommandList += "\"" + file + "\" " + " \n";
             }
 
             string includeList = "";
@@ -356,6 +365,7 @@ class Program
             {
                 string includePath = "-I\"" + path + "\" ";
                 includeList += includePath;
+                formattedCommandList += includePath + " \n";
             }
 
             string commandListTotal = compiler + " " + argumentList + outputList + includeList + fileList + linkerList;
@@ -368,7 +378,6 @@ class Program
             string compileCommandsFile = repoRoot + "compile_flags.txt";
             File.Delete(compileCommandsFile);
             var fileHandle = File.Create(compileCommandsFile);
-            string formattedCommandList = String.Join(Environment.NewLine, commandListTotal.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
             fileHandle.Write(Encoding.UTF8.GetBytes(formattedCommandList), 0, Encoding.UTF8.GetByteCount(formattedCommandList));
             fileHandle.Close();
 

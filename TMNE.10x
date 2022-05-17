@@ -11,8 +11,8 @@
 		<RebuildCommand></RebuildCommand>
 		<BuildFileCommand></BuildFileCommand>
 		<CleanCommand></CleanCommand>
-		<RunCommand></RunCommand>
-		<DebugCommand></DebugCommand>
+		<RunCommand>$(RootWorkspaceDirectory)/Bin/Raytracer/$(Configuration)/Raytracer.exe</RunCommand>
+		<DebugCommand>devenv  /DebugExe $(RootWorkspaceDirectory)/Bin/Raytracer/$(Configuration)/Raytracer.exe TEST.ppm</DebugCommand>
 		<ExePathCommand>$(RootWorkspaceDirectory)/Bin/Raytracer/$(Configuration)/Raytracer.exe</ExePathCommand>
 		<DebugSln></DebugSln>
 		<Configurations>
@@ -36,8 +36,17 @@
 				<Defines></Defines>
 				<ForceIncludes></ForceIncludes>
 			</ConfigAndPlatform>
+			<ConfigAndPlatform>
+				<Name>Release:Windows</Name>
+				<Defines></Defines>
+				<ForceIncludes></ForceIncludes>
+			</ConfigAndPlatform>
 			<Config>
 				<Name>Debug</Name>
+				<Defines></Defines>
+			</Config>
+			<Config>
+				<Name>Release</Name>
 				<Defines></Defines>
 			</Config>
 			<Platform>

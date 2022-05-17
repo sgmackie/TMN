@@ -3,7 +3,7 @@
 	"Type": "Module",
 	"Dependencies": {
 		"Files": ["../../3rdParty/mimalloc/src/static.c"],
-		"Includes": ["../../3rdParty/mimalloc/include"]
+		"Includes": ["../../3rdParty/mimalloc/include", "../../3rdParty/stb"]
 	},
 	"CompilerFlags": {
 		"Windows": {

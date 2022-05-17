@@ -36,26 +36,35 @@ namespace Math {
 		return (T)(((u64) value + alignment - 1) & ~(alignment - 1));
 	}
 
-	// TODO: Convert to union of array/u32 value?
-	// TODO: Support linear colours https://entropymine.com/imageworsener/srgbformula/
-	// TODO: Linear colour with u8 conversion https://gist.github.com/rygorous/2203834
-	struct ColourSRGB
+	union Vector3
 	{
-		u8 Red;
-		u8 Green;
-		u8 Blue;
-		u8 Alpha;
-
-		ColourSRGB::ColourSRGB(u8 r, u8 g, u8 b, u8 a = 100)
+		struct
 		{
-			Red = r;
-			Green = g;
-			Blue = b;
-			Alpha = a;
+			f32 X;
+			f32 Y;
+			f32 Z;
+		};
+		f32 Elements[3];
+
+		Vector3(const f32 x = 0, const f32 y = 0, const f32 z = 0) 
+		{
+			X = x;
+			Y = y;
+			Z = z;
 		}
+
+		static Vector3 Add(const Vector3& a, const Vector3& b);
+		static Vector3 Sub(const Vector3& a, const Vector3& b);
+		static Vector3 Multiply(const Vector3& a, const Vector3& b);
+		static Vector3 MultiplyByScalar(const Vector3& a, const f32 scale);
+		static f32 DotProduct(const Vector3& a, const Vector3& b);
+		static Vector3 CrossProduct(const Vector3& a, const Vector3& b);
+		static f32 Length(const Vector3& a);
+		static Vector3 Normalize(const Vector3& a);
 	};
 
-	u32 ConvertSRGBToU32(const ColourSRGB colour);
+
+	Vector3 RayCast(const Vector3& origin, const Vector3& direction, const f32 position);
 }
 }
 
