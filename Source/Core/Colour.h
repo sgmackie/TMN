@@ -1,29 +1,40 @@
 #pragma once
 
-#include "Types.h"
+#include "CoreTypes.h"
 
 namespace Core {
-	namespace Colour {
-		// TODO: Convert to union of array/u32 value?
-		// TODO: Support linear colours https://entropymine.com/imageworsener/srgbformula/
-		// TODO: Linear colour with u8 conversion https://gist.github.com/rygorous/2203834
-		struct SRGBA
-		{
-			u8 Red;
-			u8 Green;
-			u8 Blue;
-			u8 Alpha;
+// TODO: Convert to union of array/u32 value?
+// TODO: Support linear colours https://entropymine.com/imageworsener/srgbformula/
+// TODO: Linear colour with u8 conversion https://gist.github.com/rygorous/2203834
+struct ColourSRGBA {
+    u8 Red;
+    u8 Green;
+    u8 Blue;
+    u8 Alpha;
 
-			SRGBA::SRGBA(u8 r = 0, u8 g = 0, u8 b = 0, u8 a = 100)
-			{
-				Red = r;
-				Green = g;
-				Blue = b;
-				Alpha = a;
-			}
-		};
+    ColourSRGBA(u8 R = 0, u8 G = 0, u8 B = 0, u8 A = 100)
+    {
+        Red = R;
+        Green = G;
+        Blue = B;
+        Alpha = A;
+    }
 
-		u32 ConvertSRGBAToU32(const SRGBA& colour);
-	}
+    static ColourSRGBA CreateRed()
+    {
+        return ColourSRGBA(0, 0, 0);
+    }
+
+    static ColourSRGBA CreateGreen()
+    {
+        return ColourSRGBA(0, 255, 0);
+    }
+
+    static ColourSRGBA CreateBlue()
+    {
+        return ColourSRGBA(0, 0, 255);
+    }
+};
+
+u32 ConvertSRGBAToU32(const ColourSRGBA &Colour);
 }
-

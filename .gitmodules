@@ -1,0 +1,6 @@
+[submodule "Source/3rdParty/stb"]
+	path = Source/3rdParty/stb
+	url = https://github.com/nothings/stb.git
+[submodule "Source/3rdParty/tlsf"]
+	path = Source/3rdParty/tlsf
+	url = https://github.com/mattconte/tlsf.git

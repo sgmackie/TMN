@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Types.h"
+#include "CoreTypes.h"
 #include "Platform.h"
 
 // Includes
@@ -15,5 +15,12 @@
 #pragma comment(lib, "Kernel32.lib")
 #pragma comment(lib, "Advapi32.lib")
 
+namespace Core {
+namespace Platform {
+    namespace VirtualMemory {
+        DWORD GetAllocFlags(const Flags Flags);
+    }
+}
+}
 
 #endif

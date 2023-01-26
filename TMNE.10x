@@ -1,20 +1,22 @@
 <?xml version="1.0"?>
 <N10X>
 	<Workspace>
-		<FileTypes>Any File (*.*)</FileTypes>
-		<ExcludeFilters></ExcludeFilters>
+		<IncludeFilter>*.*,</IncludeFilter>
+		<ExcludeFilter></ExcludeFilter>
 		<SyncFiles>true</SyncFiles>
 		<Recursive>true</Recursive>
 		<IsVirtual>false</IsVirtual>
 		<IsFolder>false</IsFolder>
-		<BuildCommand>$(RootWorkspaceDirectory)/BuildProject.bat $(RootWorkspaceDirectory)/Source/Raytracer/Raytracer.TMNE_BUILD $(Platform) $(Configuration)</BuildCommand>
+		<BuildCommand>call $(RootWorkspaceDirectory)/BuildAllWindows.bat $(Configuration)</BuildCommand>
 		<RebuildCommand></RebuildCommand>
 		<BuildFileCommand></BuildFileCommand>
 		<CleanCommand></CleanCommand>
+		<BuildWorkingDirectory></BuildWorkingDirectory>
 		<RunCommand>$(RootWorkspaceDirectory)/Bin/Raytracer/$(Configuration)/Raytracer.exe</RunCommand>
 		<DebugCommand>devenv  /DebugExe $(RootWorkspaceDirectory)/Bin/Raytracer/$(Configuration)/Raytracer.exe TEST.ppm</DebugCommand>
 		<ExePathCommand>$(RootWorkspaceDirectory)/Bin/Raytracer/$(Configuration)/Raytracer.exe</ExePathCommand>
 		<DebugSln></DebugSln>
+		<UseVisualStudioEnvBat>false</UseVisualStudioEnvBat>
 		<Configurations>
 			<Configuration>Debug</Configuration>
 			<Configuration>Release</Configuration>
@@ -51,7 +53,10 @@
 			</Config>
 			<Platform>
 				<Name>Windows</Name>
-				<Defines></Defines>
+				<Defines>
+					<Define>CORE_PLATFORM_WINDOWS=1</Define>
+					<Define>CORE_PROFILER_SUPERLUMINAL=1</Define>
+				</Defines>
 			</Platform>
 			<Platform>
 				<Name>x64</Name>

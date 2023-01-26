@@ -1,26 +1,19 @@
 {
+    "version": "2.0.0",
     "tasks": [
         {
+            "label": "Build All",
             "type": "shell",
-            "label": "Run TMNE Debug build",
-            "command": "${workspaceFolder}/BuildProject.sh",
-            "args": [
-                "${workspaceFolder}/Tools/TMNEBuild/",
-                "${workspaceFolder}/Source/Raytracer/Raytracer.TMNE_BUILD",
-                "MacOS",
-                "Debug",
-            ],
-            "options": {
-                "cwd": "${fileDirname}"
+            "group": {
+                "kind": "build",
+                "isDefault": true
             },
             "problemMatcher": [
                 "$gcc"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
+            "osx": {
+                "command": "${workspaceFolder}/Source/Granulator/BuildGranulatorMac.sh"
             }
-        }
-    ],
-    "version": "2.0.0"
+        },
+    ]
 }

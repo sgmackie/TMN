@@ -1,10 +1,9 @@
-#if defined(CORE_PLATFORM_MACOS)
+#if defined(CORE_PLATFORM_MAC)
 
 #pragma once
 
-#include "Types.h"
-#include "Container/String.h"
-#include "Platform.h"
+#include "../../CoreTypes.h"
+#include "../../Platform.h"
 
 // Mac includes
 typedef f64 double_t;
@@ -19,12 +18,10 @@ typedef f64 double_t;
 
 // String handling
 #if defined(__OBJC__)
-inline NSString* CoreStringToNSString (const Core::Container::String& string)
+inline NSString *CoreStringToNSString(const Core::Container::String &string)
 {
-    return [NSString stringWithUTF8String: string.ToUTF8()];
+    return [NSString stringWithUTF8String:string.ToUTF8()];
 }
 #endif
 
-
 #endif
-

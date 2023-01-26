@@ -1,86 +1,89 @@
-#include "Core.h"
+#include "../Core/Allocator.h"
+#include "../Core/Colour.h"
+#include "../Core/Container/String.h"
+#include "../Core/CoreMath.h"
+#include "../Core/Platform.h"
 
 using namespace Core;
 using namespace Core::Container;
-using namespace Core::Math;
 
-// TODO: Fix clang-tidy auto save
-// TODO: assert with message and call stack https://github.com/JochenKalmbach/StackWalker
-// TODO: Add custom std::move https://www.foonathan.net/2020/09/move-forward/
+typedef struct ProgramState {
+    usize TotalMemoryInBytes;
+    AllocatorTLSF *BackingAllocator = nullptr;
+    AllocatorLinear *MainAllocator = nullptr;
+    char **Arguments;
+} ProgramState;
 
-
-void RenderImage(Memory::AllocatorLinear *frameAllocator, String* fileBuffer, const usize width, const usize height)
+void RenderImage(ProgramState *RunState, String *FileBuffer, const usize Width, const usize Height)
 {
-	PROFILER_EVENT_START("RenderImage", Colour::SRGBA(255, 0, 0))
+    PROFILER_EVENT_START("RenderImage", ColourSRGBA::CreateRed());
 
-	fileBuffer->Clear();
-	fileBuffer->Append("P3\n");
-	fileBuffer->AppendFormat("%d %d\n", width, height);
-	fileBuffer->Append("255\n");
+    FileBuffer->Clear();
+    FileBuffer->Append("P3\n");
+    FileBuffer->AppendFormat("%d %d\n", Width, Height);
+    FileBuffer->Append("255\n");
 
-	DynamicArray<Colour::SRGBA> colours(frameAllocator, width * height);
+    const usize TotalImageSize = Width * Height;
+    DynamicArray<ColourSRGBA> Colours(RunState->MainAllocator, TotalImageSize);
 
-	for (usize i = 0; i < width * height; ++i) {
-		colours.Add(Colour::SRGBA(255, 0, 0));
-	}
+    for (usize i = 0; i < TotalImageSize; ++i) {
+        Colours.Add(ColourSRGBA(255, 0, 0));
+    }
 
-	for (const Colour::SRGBA& colour : colours) {
-		fileBuffer->AppendFormat("%u %u %u\t", colour.Red, colour.Green, colour.Blue);
-	}
+    for (const ColourSRGBA &Colour : Colours) {
+        FileBuffer->AppendFormat("%u %u %u\t", Colour.Red, Colour.Green, Colour.Blue);
+    }
 
-	Vector3 cast = Math::RayCast(Vector3(), Vector3(50, 0, 0), 0.13f);
+    Vector3 Cast = RayCast(Vector3(), Vector3(50, 0, 0), 0.13f);
 
-	fileBuffer->Append("\n");
+    FileBuffer->Append("\n");
 
-	frameAllocator->Reset();
-
-	PROFILER_EVENT_STOP()
+    PROFILER_EVENT_STOP();
 }
 
-void Run(Memory::Allocator *allocator, char **arguments)
+void Run(ProgramState *RunState)
 {
-	PROFILER_EVENT_START("Run", Colour::SRGBA(255, 0, 0))
+    PROFILER_EVENT_START("Run", ColourSRGBA::CreateRed());
 
-	String testFilePath(allocator, arguments[0]);
-	testFilePath.Trim(14);
-	testFilePath.AppendAsPath(arguments[1]);
-	printf("%s\n", testFilePath.ToUTF8());
+    AllocatorLinear ProgramAllocator = AllocatorLinear(RunState->BackingAllocator, RunState->TotalMemoryInBytes);
+    RunState->MainAllocator = &ProgramAllocator;
 
-	Platform::File testFile;
-	if (Platform::FileIO::Exists(allocator, testFilePath.ToUTF8())) {
-		Platform::FileIO::Remove(allocator, testFilePath.ToUTF8());
-	}
+    String TestFilePath(RunState->MainAllocator, RunState->Arguments[1]);
+    CORE_LOG(RunState->MainAllocator, "Loading file %s", TestFilePath.ToUTF8());
 
-	if (!Platform::FileIO::CreateToWrite(allocator, testFilePath.ToUTF8(), &testFile)) {
-		return;
-	}
+    Platform::FileIO::File TestFile;
+    if (Platform::FileIO::Exists(RunState->MainAllocator, TestFilePath.ToUTF8())) {
+        Platform::FileIO::Remove(RunState->MainAllocator, TestFilePath.ToUTF8());
+    }
 
-	const usize imageWidth = String::ToU64(arguments[2]);
-	const usize imageHeight = String::ToU64(arguments[3]);
-	const usize bufferSize = ((4 * 3 + 2) * (imageWidth * imageHeight)) + 16;
-	String fileBuffer(allocator, bufferSize);
-	Memory::AllocatorLinear* frameAllocator = new(allocator) Memory::AllocatorLinear(allocator, Megabytes(64));
-	RenderImage(frameAllocator, &fileBuffer, imageWidth, imageHeight);
+    if (!Platform::FileIO::CreateToWrite(&ProgramAllocator, TestFilePath.ToUTF8(), &TestFile)) {
+        return;
+    }
 
-	Platform::FileIO::Write(allocator, &testFile, (u8*) fileBuffer.ToUTF8(), fileBuffer.SizeInBytes());
-	Platform::FileIO::Close(&testFile);
+    const usize ImageWidth = String::ToU64(RunState->Arguments[2]);
+    const usize ImageHeight = String::ToU64(RunState->Arguments[3]);
+    const usize BufferSize = ((4 * 3 + 2) * (ImageWidth * ImageHeight)) + 16;
+    String FileBuffer(RunState->MainAllocator, BufferSize);
+    RenderImage(RunState, &FileBuffer, ImageWidth, ImageHeight);
 
-	operator::delete(frameAllocator, allocator);
+    Platform::FileIO::Write(RunState->MainAllocator, &TestFile, reinterpret_cast<u8 *>(FileBuffer.ToUTF8()), FileBuffer.SizeInBytes());
+    Platform::FileIO::Close(&TestFile);
 
-	PROFILER_EVENT_STOP()
+    PROFILER_EVENT_STOP();
 }
 
 int main(int argc, char *argv[])
 {
-	assert(argc == 4);
+    PROFILER_THREAD_ID("Main");
 
-	PROFILER_THREAD_ID("Main")
+    ProgramState RunState = {};
+    RunState.TotalMemoryInBytes = Megabytes(64);
+    RunState.Arguments = argv;
 
-	Memory::Allocator *mainAllocator = Core::Startup(Core::GlobalAllocatorType::MiMalloc);
+    AllocatorTLSF GlobalAllocator = AllocatorTLSF(RunState.TotalMemoryInBytes);
+    RunState.BackingAllocator = &GlobalAllocator;
 
-	Run(mainAllocator, argv);
-		
-	Core::Shutdown(mainAllocator);
+    Run(&RunState);
 
-	return 0;
+    return 0;
 }

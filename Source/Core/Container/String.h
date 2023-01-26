@@ -1,140 +1,162 @@
 #pragma once
 
-#include "Types.h"
+#include "../Allocator.h"
+#include "../CoreTypes.h"
+#include "../Platform.h"
+#include "../Unicode.h"
 #include "DynamicArray.h"
-#include "Memory/Allocator.h"
-#include "Platform.h"
 
-#define STB_SPRINTF_IMPLEMENTATION
-#include "stb_sprintf.h"
+#include "../../3rdParty/stb/stb_sprintf.h"
 
 namespace Core {
 namespace Container {
     class String
     {
     public:
-		#define STRING_FORMAT_BUFFER 512
+#define STRING_FORMAT_BUFFER 512
 
-		String(Memory::Allocator *allocator, const usize reserveSize = 0) : Buffer(allocator, reserveSize)
+        String(Core::Allocator *InAllocator, const usize InReserveSize = 0)
+            : Buffer(InAllocator, InReserveSize)
         {
-			Buffer.Add('\0');
+            Buffer.Add('\0');
         }
 
-		String(Memory::Allocator *allocator, const char* stringLiteral, const usize length) : Buffer(allocator, length)
-		{
-			Buffer.Set(stringLiteral, length);
-			Buffer.Add('\0');
-		}
-
-		String(Memory::Allocator *allocator, const char* stringLiteral) : Buffer(allocator)
-		{
-			Buffer.Set(stringLiteral, strlen(stringLiteral));
-			Buffer.Add('\0');
-		}
-
-		~String()
-		{
-		}
-
-		void Append(const char character)
-		{
-			Append(&character, 1);
-		}
-
-		void Append(const char* stringLiteral)
-		{
-			Append(stringLiteral, strlen(stringLiteral));
-		}
-
-		void Append(const char* stringLiteral, const usize length)
-		{
-			if (IsNullTerminated() && Length() > 0) {
-				Buffer.RemoveAt(Buffer.Count - 1);
-			}
-
-			Buffer.Append(stringLiteral, length);
-			Buffer.Add('\0');
-		}
-
-		void AppendAsPath(const char* stringLiteral)
-		{
-			Append(Platform::FileIO::GetPathSeperator());
-			Append(stringLiteral);
-		}
-	
-		void AppendAsPath(const String* input)
-		{
-			AppendAsPath(input->ToUTF8());
-		}
-
-		void AppendFormat(const char *format, ...)
-		{
-			va_list args;
-			va_start(args, format);
-			char tempBuffer[STRING_FORMAT_BUFFER]; // TODO: Handle cases bigger than 512
-			usize charactersWritten = stbsp_vsnprintf(tempBuffer, STRING_FORMAT_BUFFER, format, args);
-			va_end(args);
-			
-			if ((Length() + charactersWritten) > Buffer.Capacity) {
-				Buffer.Reserve(Buffer.Capacity + charactersWritten);
-			}
-
-			if (IsNullTerminated() && Length() > 0) {
-				Buffer.RemoveAt(Buffer.Count - 1);
-			}
-
-			memmove(Buffer.Buffer + Length(), tempBuffer, sizeof(char) * charactersWritten);
-			Buffer.Count += charactersWritten;
-			Buffer.Add('\0');
-		}
-
-		void Trim(const usize count)
-		{
-			if (IsNullTerminated() && Length() > 0) {
-				Buffer.RemoveAt(Buffer.Count - 1);
-			}
-
-			const usize originalSize = Buffer.Count;
-			for (usize i = 0; i < count; ++i) {
-				Buffer.RemoveAt(originalSize - i);
-			}
-
-			Buffer.Add('\0');
-		}
-
-        char* ToUTF8() const
+        String(Core::Allocator *InAllocator, const char *InStringLiteral, const usize InLength)
+            : Buffer(InAllocator, InLength)
         {
-            if (Platform::Unicode::UTF8IsValid(Buffer.Buffer)) {
+            Buffer.Set(InStringLiteral, InLength);
+            Buffer.Add('\0');
+        }
+
+        String(Core::Allocator *InAllocator, const char *InStringLiteral)
+            : Buffer(InAllocator)
+        {
+            Buffer.Set(InStringLiteral, strlen(InStringLiteral));
+            Buffer.Add('\0');
+        }
+
+        ~String()
+        {
+        }
+
+        // TODO: Why doesn't this work?
+        char &operator[](usize Index)
+        {
+            CORE_ASSERT(Index <= (Length() - 1));
+            return Buffer[Index];
+        }
+
+        const char &operator[](const usize Index) const
+        {
+            CORE_ASSERT(Index <= (Length() - 1));
+            return Buffer[Index];
+        }
+
+        char &GetCharacterAtIndex(usize Index)
+        {
+            CORE_ASSERT(Index <= (Length() - 1));
+            return Buffer[Index];
+        }
+
+        void Append(const char character)
+        {
+            Append(&character, 1);
+        }
+
+        void Append(const char *StringLiteral)
+        {
+            Append(StringLiteral, strlen(StringLiteral));
+        }
+
+        void Append(const char *StringLiteral, const usize Length)
+        {
+            if (IsNullTerminated() && Buffer.Count > 0) {
+                Buffer.RemoveAt(Buffer.Count - 1);
+            }
+
+            Buffer.Append(StringLiteral, Length);
+            Buffer.Add('\0');
+        }
+
+        void AppendAsPath(const char *StringLiteral)
+        {
+            Append(Platform::FileIO::GetPathSeperator());
+            Append(StringLiteral);
+        }
+
+        void AppendAsPath(const String *InBuffer)
+        {
+            AppendAsPath(InBuffer->ToUTF8());
+        }
+
+        void AppendFormat(const char *Format, ...)
+        {
+            va_list VArgs;
+            va_start(VArgs, Format);
+            char TempBuffer[STRING_FORMAT_BUFFER]; // TODO: Handle cases bigger than 512
+            usize CharactersWritten = stbsp_vsnprintf(TempBuffer, STRING_FORMAT_BUFFER, Format, VArgs);
+            va_end(VArgs);
+
+            if ((Length() + CharactersWritten) > Buffer.Capacity) {
+                Buffer.Reserve(Buffer.Capacity + CharactersWritten);
+            }
+
+            if (IsNullTerminated() && Length() > 0) {
+                Buffer.RemoveAt(Buffer.Count - 1);
+            }
+
+            memmove(Buffer.Buffer + Length(), TempBuffer, sizeof(char) * CharactersWritten);
+            Buffer.Count += CharactersWritten;
+            Buffer.Add('\0');
+        }
+
+        void Trim(const usize Count)
+        {
+            if (IsNullTerminated() && Length() > 0) {
+                Buffer.RemoveAt(Buffer.Count - 1);
+            }
+
+            const usize originalSize = Buffer.Count;
+            for (usize i = 0; i < Count; ++i) {
+                Buffer.RemoveAt(originalSize - i);
+            }
+
+            Buffer.Add('\0');
+        }
+
+        char *ToUTF8() const
+        {
+            if (UTF8IsValid(Buffer.Buffer)) {
                 return Buffer.Buffer;
             }
 
             return nullptr;
         }
 
-		void Clear()
-		{
-			Buffer.Clear();
-		}
+        void Clear()
+        {
+            Buffer.Clear();
+        }
 
-		bool IsNullTerminated() const
-		{
-			return Buffer.Buffer[Length()] == 0 ? true : false;
-		}
+        bool IsNullTerminated() const
+        {
+            return Buffer.Buffer[Length()] == 0 ? true : false;
+        }
 
-		usize Length() const
-		{
-			return Buffer.Count;
-		}
+        usize Length() const
+        {
+            return Buffer.Count;
+        }
 
-		usize SizeInBytes() const
-		{
-			return Buffer.SizeInBytes();
-		}
+        usize SizeInBytes() const
+        {
+            return Buffer.SizeInBytes();
+        }
 
-		static u64 ToU64(char *string, const u8 base = 10)
-		{
-			return strtoull(string, 0, base);
-		}
+        static u64 ToU64(char *String, const u8 base = 10)
+        {
+            return strtoull(String, 0, base);
+        }
 
         Container::DynamicArray<char> Buffer;
     };

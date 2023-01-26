@@ -2,13 +2,13 @@
 
 // Typedefs
 #include <assert.h>
+#include <initializer_list>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <initializer_list>
 
 // Standard integers
 // Unsigned
@@ -28,7 +28,7 @@ typedef float f32;
 typedef double f64;
 
 // Memory model
-typedef u64 usize;
+typedef size_t usize;
 typedef uintptr_t uptr;
 typedef intptr_t iptr;
 
@@ -39,7 +39,7 @@ typedef intptr_t iptr;
 #define Terabytes(value) (Gigabytes(value) * 1024LL)
 
 // Pointers
-#define AlignPow2(value, alignment) (((value) + ((alignment) - 1)) & ~(((value) - (value)) + (alignment) - 1))
+#define AlignPow2(value, alignment) (((value) + ((alignment) -1)) & ~(((value) - (value)) + (alignment) -1))
 #define Align4(value) (((value) + 3) & ~3)
 #define Align8(value) (((value) + 7) & ~7)
 #define Align16(value) (((value) + 15) & ~15)

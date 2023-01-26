@@ -1,16 +1,18 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
     "configurations": [
         {
-            "type": "lldb",
+            "name": "Build and Debug",
+            "type": "cppdbg",
             "request": "launch",
-            "name": "Launch",
-            "program": "${workspaceFolder}/Bin/Raytracer/Debug/Raytracer",
-            "args": ["テスト映像.ppm"],
-            "cwd": "${workspaceFolder}/Source/"
+            "program": "${workspaceFolder}/Bin/Granulator/Mac/Debug/Granulator",
+            "args": [],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "preLaunchTask": "Build All"
         }
-    ]
+    ],
+    "version": "2.0.0"
 }

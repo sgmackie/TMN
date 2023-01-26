@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Types.h"
-#include "Log.h"
+#include "../CoreTypes.h"
+#include "../Logging.h"
 
 namespace Core {
 namespace Container {
-    template<typename T, const usize N>
+    template <typename T, const usize N>
     class Array
     {
     public:
@@ -14,61 +14,66 @@ namespace Container {
             Clear();
         }
 
-        Array(T* buffer) 
+        Array(T *Buffer)
         {
-            assert(buffer != nullptr);
-            memcpy(Buffer, buffer, (sizeof(T) * N));
+            CORE_ASSERT(Buffer != nullptr);
+            memcpy(Buffer, Buffer, (sizeof(T) * N));
         }
 
-        Array(std::initializer_list<T> list) 
+        Array(std::initializer_list<T> List)
         {
-            assert(list.size() == N);
-            memcpy(Buffer, list.begin(), (sizeof(T) * list.size()));
+            CORE_ASSERT(List.size() == N);
+            memcpy(Buffer, List.begin(), (sizeof(T) * List.size()));
         }
 
-        usize Count() const 
-        {                 
+        usize Count() const
+        {
             return N;
         }
 
         void Clear()
         {
-			memset(Buffer, 0, (sizeof(T) * N));
+            memset(Buffer, 0, (sizeof(T) * N));
         }
 
-        T& operator[] (const usize index) 
+        T &operator[](const usize Index)
         {
-            assert(index <= N);
-            return Buffer[index];
+            CORE_ASSERT(Index <= N);
+            return Buffer[Index];
         }
 
-		const T& operator[] (const usize index) const
-		{
-			assert(index <= N);
-			return Buffer[index];
-		}
+        const T &operator[](const usize Index) const
+        {
+            assert(Index <= N);
+            return Buffer[Index];
+        }
 
-        T& operator= (std::initializer_list<T> list);
+        T &operator=(std::initializer_list<T> List);
 
-		T* begin()
-		{
-			return &Buffer[0];
-		}
+        T *begin()
+        {
+            return &Buffer[0];
+        }
 
-		T* end()
-		{
-			return &Buffer[N-1];
-		}
+        T *end()
+        {
+            return &Buffer[N - 1];
+        }
 
-		const T* begin() const
-		{
-			return &Buffer[0];
-		}
+        const T *begin() const
+        {
+            return &Buffer[0];
+        }
 
-		const T* end() const
-		{
-			return &Buffer[N-1];
-		}
+        const T *end() const
+        {
+            return &Buffer[N - 1];
+        }
+
+        T *ToCArray()
+        {
+            return Buffer;
+        }
 
         T Buffer[N];
     };

@@ -1,14 +1,13 @@
 #pragma once
 
-#include "Types.h"
-#include "Log.h"
+#include "../CoreTypes.h"
+#include "../Logging.h"
 
 namespace Core {
 namespace Container {
     template <typename T>
-    struct Span
-    {
-	    Span()
+    struct Span {
+        Span()
         {
             Clear();
         }
@@ -20,42 +19,39 @@ namespace Container {
 
         void Clear()
         {
-            Start = nullptr;
-            End = nullptr;
+            Buffer = nullptr;
+            Count = 0;
         }
 
-	    Span(T* startPointer, const usize count)
+        Span(T *StartPointer, const usize InCount)
         {
-            Start = startPointer;
-            End = startPointer + count;
+            Buffer = StartPointer;
+            Count = InCount;
         }
 
-        usize Count() const
+        usize SizeInBytes() const
         {
-            return (usize) (End - Start);
+            return sizeof(T) * Count;
         }
 
-        T& operator[] (const usize index) 
+        T &operator[](const usize Index)
         {
-            assert(Start + index < End);
-            return Start[index];
+            CORE_ASSERT(Buffer + Index < end());
+            return Buffer[Index];
         }
 
-        T* begin()
+        T *begin()
         {
-            return Start;
+            return Buffer[0];
         }
 
-        T* end()
+        T *end()
         {
-            return End;
+            return Buffer + SizeInBytes();
         }
 
-		// TODO: Use a single pointer with an offset instead
-		// TODO: Support indexing offsets
-	    T* Start;
-	    T* End;
+        T *Buffer = nullptr;
+        usize Count = 0;
     };
 }
 }
-
