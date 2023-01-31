@@ -5,6 +5,7 @@
 
 #define Min(A, B) ((A < B) ? (A) : (B))
 #define Max(A, B) ((A > B) ? (A) : (B))
+#define CORE_SMALL_NUMBER (1.e-8f)
 
 namespace Core {
 template <typename T>
@@ -36,7 +37,6 @@ constexpr T Align(const T Value, const u64 Alignment)
     return (T) (((u64) Value + Alignment - 1) & ~(Alignment - 1));
 }
 
-#define CORE_SMALL_NUMBER (1.e-8f)
 static bool IsNearlyZero(const f32 Value, f32 ErrorTolerance = CORE_SMALL_NUMBER)
 {
 	return fabs(Value) <= ErrorTolerance;

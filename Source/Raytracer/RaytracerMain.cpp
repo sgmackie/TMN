@@ -72,7 +72,6 @@ void RenderImage(ProgramState *RunState, String *FileBuffer, RenderCamera *Camer
 		}
 	}
 
-
 	// Write out to file
 	for (const ColourSRGBA &Colour : Colours) {
 		FileBuffer->AppendFormat("%u %u %u\t", Colour.Red, Colour.Green, Colour.Blue);
