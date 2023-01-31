@@ -126,11 +126,11 @@ namespace Container {
 
         char *ToUTF8() const
         {
-            if (UTF8IsValid(Buffer.Buffer)) {
-                return Buffer.Buffer;
+            if (!UTF8IsValid(Buffer.Buffer)) {
+				 return nullptr;
             }
 
-            return nullptr;
+			return Buffer.Buffer;
         }
 
         void Clear()
@@ -153,10 +153,16 @@ namespace Container {
             return Buffer.SizeInBytes();
         }
 
-        static u64 ToU64(char *String, const u8 base = 10)
+        static u64 ToU64(char *String, const u8 Base = 10)
         {
-            return strtoull(String, 0, base);
+			return strtoull(String, 0, Base);
         }
+
+		static f32 ToF32(char *String)
+		{
+			char **EndPoint = nullptr;
+			return strtof(String, EndPoint);
+		}
 
         Container::DynamicArray<char> Buffer;
     };

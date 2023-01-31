@@ -10,7 +10,7 @@ Vector3 Vector3::Add(const Vector3 &A, const Vector3 &B)
     return Vector3(X, Y, Z);
 }
 
-Vector3 Vector3::Sub(const Vector3 &A, const Vector3 &B)
+Vector3 Vector3::Subtract(const Vector3 &A, const Vector3 &B)
 {
     const f32 X = A.X - B.X;
     const f32 Y = A.Y - B.Y;
@@ -32,6 +32,22 @@ Vector3 Vector3::MultiplyByScalar(const Vector3 &A, const f32 Scalar)
     const f32 Y = A.Y * Scalar;
     const f32 Z = A.Z * Scalar;
     return Vector3(X, Y, Z);
+}
+
+Vector3 Vector3::Divide(const Vector3 &A, const Vector3 &B)
+{
+	const f32 X = A.X / B.X;
+	const f32 Y = A.Y / B.Y;
+	const f32 Z = A.Z / B.Z;
+	return Vector3(X, Y, Z);
+}
+
+Vector3 Vector3::DivideByScalar(const Vector3 &A, const f32 Scalar)
+{
+	const f32 X = A.X / Scalar;
+	const f32 Y = A.Y / Scalar;
+	const f32 Z = A.Z / Scalar;
+	return Vector3(X, Y, Z);
 }
 
 f32 Vector3::DotProduct(const Vector3 &A, const Vector3 &B)
@@ -60,6 +76,11 @@ Vector3 Vector3::Normalize(const Vector3 &A)
     }
     const f32 InverseLength = 1.0f / Length;
     return Vector3::MultiplyByScalar(A, InverseLength);
+}
+
+Vector3 Vector3::UnitVector(const Vector3 &A)
+{
+	return Vector3::DivideByScalar(A, Vector3::Length(A));
 }
 
 Vector3 RayCast(const Vector3 &Origin, const Vector3 &Direction, const f32 Position)

@@ -44,7 +44,7 @@ namespace Container {
 
         const T &operator[](const usize Index) const
         {
-            assert(Index <= N);
+			CORE_ASSERT(Index <= N);
             return Buffer[Index];
         }
 
