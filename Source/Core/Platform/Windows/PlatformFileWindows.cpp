@@ -7,6 +7,28 @@
 namespace Core {
 namespace Platform {
     namespace FileIO {
+		bool DirectoryExists(Core::Allocator *Allocator, const char *DirectoryPath)
+		{
+			WIN32_FILE_ATTRIBUTE_DATA FileData;
+			wchar_t *WidePath = reinterpret_cast<wchar_t *>(UTF8ToUTF16(Allocator, DirectoryPath));
+			if (!GetFileAttributesExW(WidePath, GetFileExInfoStandard, &FileData)) {
+				return false;
+			}
+
+			if (FileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			{
+				return true;
+			}
+
+			return false;
+		}
+
+		bool DirectoryCreate(Core::Allocator *Allocator, const char *DirectoryPath)
+		{
+			wchar_t *WidePath = reinterpret_cast<wchar_t *>(UTF8ToUTF16(Allocator, DirectoryPath));
+			return CreateDirectoryW(WidePath, 0);
+		}
+
         const char *GetPathSeperator()
         {
             return "\\";

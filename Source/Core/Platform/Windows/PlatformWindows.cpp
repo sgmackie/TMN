@@ -71,6 +71,29 @@ namespace Platform {
         CORE_ASSERT(Result);
     }
 
+	u64 Time::GetCPUTime()
+	{
+		LARGE_INTEGER Counter;
+		QueryPerformanceCounter(&Counter);
+		return Counter.QuadPart;
+	}
+
+	Time::SystemTime Time::GetSystemTime()
+	{
+		SYSTEMTIME ClockTime;
+		GetSystemTime(&ClockTime);
+
+		Time::SystemTime Result;
+		Result.Year = ClockTime.wYear;
+		Result.Month = ClockTime.wMonth;
+		Result.Day = ClockTime.wDay;
+		Result.Hour = ClockTime.wHour;
+		Result.Minute = ClockTime.wMinute;
+		Result.Second = ClockTime.wSecond;
+		Result.Milliseconds = ClockTime.wMilliseconds;
+		return Result;
+	}
+
     void Process::PrintToConsole(Core::Allocator *Allocator, const char *Buffer)
     {
         wchar_t *WideBuffer = reinterpret_cast<wchar_t *>(UTF8ToUTF16(Allocator, Buffer));

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <N10X>
 	<Workspace>
-		<IncludeFilter>*.*,</IncludeFilter>
+		<IncludeFilter>x86,</IncludeFilter>
 		<ExcludeFilter></ExcludeFilter>
 		<SyncFiles>true</SyncFiles>
 		<Recursive>true</Recursive>
@@ -25,13 +25,24 @@
 			<Platform>Windows</Platform>
 			<Platform>Linux</Platform>
 		</Platforms>
-		<AdditionalIncludePaths></AdditionalIncludePaths>
+		<AdditionalIncludePaths>
+			<AdditionalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um\</AdditionalIncludePath>
+			<AdditionalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\</AdditionalIncludePath>
+			<AdditionalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um</AdditionalIncludePath>
+			<AdditionalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0</AdditionalIncludePath>
+		</AdditionalIncludePaths>
 		<Defines></Defines>
 		<ConfigProperties>
 			<ConfigAndPlatform>
 				<Name>Debug:Windows</Name>
 				<Defines></Defines>
-				<ForceIncludes></ForceIncludes>
+				<ForceIncludes>
+					<ForceInclude>C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um\</ForceInclude>
+					<ForceInclude>C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\</ForceInclude>
+					<ForceInclude>C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um</ForceInclude>
+					<ForceInclude>C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0</ForceInclude>
+					<ForceInclude>C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\um\fileapi.h</ForceInclude>
+				</ForceIncludes>
 			</ConfigAndPlatform>
 			<ConfigAndPlatform>
 				<Name>Debug:x64</Name>
@@ -56,6 +67,10 @@
 				<Defines>
 					<Define>CORE_PLATFORM_WINDOWS=1</Define>
 					<Define>CORE_PROFILER_SUPERLUMINAL=1</Define>
+					<Define>WIN32_LEAN_AND_MEAN=1</Define>
+					<Define>NOCOMM=1</Define>
+					<Define>_WIN32=1</Define>
+					<Define>UNICODE=1</Define>
 				</Defines>
 			</Platform>
 			<Platform>

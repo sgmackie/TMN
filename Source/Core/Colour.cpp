@@ -58,6 +58,7 @@ ColourLinear ColourLinear::DivideByScalar(const ColourLinear &A, const f32 Scale
 
 ColourSRGBA ColourLinear::ConvertToU8() const
 {
+	// TODO: Verify this
 	Container::Array<u8, 3> ConvertedElements;
 	for (usize i = 0; i < Elements.Count(); ++i)
 	{

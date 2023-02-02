@@ -164,6 +164,22 @@ namespace Container {
 			return strtof(String, EndPoint);
 		}
 
+		static String FromSystemTime(Core::Allocator *InAllocator, const Platform::Time::SystemTime& Time, const bool bWithUnderScores)
+		{
+			char TempBuffer[STRING_FORMAT_BUFFER];
+			if (bWithUnderScores)
+			{
+				stbsp_sprintf(TempBuffer, "%lu_%lu_%lu_%lu_%lu_%lu_%lu", Time.Day, Time.Month, Time.Year, Time.Hour, Time.Minute, Time.Second, Time.Milliseconds);
+			}
+			else
+			{
+				stbsp_sprintf(TempBuffer, "%lu/%lu/%lu %lu:%lu:%lu:%lu", Time.Day, Time.Month, Time.Year, Time.Hour, Time.Minute, Time.Second, Time.Milliseconds);
+			}
+			
+			String Result(InAllocator, TempBuffer, strlen(TempBuffer));
+			return Result;
+		}
+
         Container::DynamicArray<char> Buffer;
     };
 }

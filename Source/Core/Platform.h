@@ -29,13 +29,29 @@ namespace Platform {
         void Protect(void *Pointer, const usize Size);
     }
 
+	namespace Time {
+		struct SystemTime {
+			u64 Year;
+			u64 Month;
+			u64 Day;
+			u64 Hour;
+			u64 Minute;
+			u64 Second;
+			u64 Milliseconds;
+		};
+		
+		u64 GetCPUTime();
+		SystemTime GetSystemTime();
+	}
+
     namespace FileIO {
         struct File {
             u64 Handle;
         };
 
         // File system
-        bool DirectoryExists(const char *DirectoryPath);
+		bool DirectoryExists(Core::Allocator *Allocator, const char *DirectoryPath);
+		bool DirectoryCreate(Core::Allocator *Allocator, const char *DirectoryPath);
         const char *GetPathSeperator();
 
         // File IO

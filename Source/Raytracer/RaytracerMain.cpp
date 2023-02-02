@@ -53,6 +53,7 @@ void RenderImage(ProgramState *RunState, String *FileBuffer, RenderCamera *Camer
 	const ColourLinear White = ColourLinear(1.0f, 1.0f, 1.0f);
 	const ColourLinear Blue = ColourLinear(0.5f, 0.7f, 1.0f);
 
+
 	for (int YIdx = (ImageHeight - 1); YIdx >= 0; --YIdx)
 	{
 		for (int XIdx = 0; XIdx < ImageWidth; ++XIdx)
@@ -68,7 +69,12 @@ void RenderImage(ProgramState *RunState, String *FileBuffer, RenderCamera *Camer
 			const f32 LerpDelta = 0.5f * (RayDirection.Y + 1.0f);
 			const ColourLinear Gradient = (White * (1.0f - LerpDelta)) + (Blue * LerpDelta);
 
-			Colours.Add(Gradient.ConvertToU8());
+			ColourSRGBA Convert;
+			Convert.Red = 255.999 * Gradient.Red;
+			Convert.Green = 255.999 * Gradient.Green;
+			Convert.Blue = 255.999 * Gradient.Blue;
+
+			Colours.Add(Convert);
 		}
 	}
 
@@ -89,15 +95,24 @@ void Run(ProgramState *RunState)
     AllocatorLinear ProgramAllocator = AllocatorLinear(RunState->BackingAllocator, RunState->TotalMemoryInBytes);
     RunState->MainAllocator = &ProgramAllocator;
 
-    String TestFilePath(RunState->MainAllocator, RunState->Arguments[1]);
-    CORE_LOG(RunState->MainAllocator, "Loading file %s", TestFilePath.ToUTF8());
+    String RenderOutputPath(RunState->MainAllocator, RunState->Arguments[1]);
+	if (!Platform::FileIO::DirectoryExists(RunState->MainAllocator, RenderOutputPath.ToUTF8()))
+	{
+		Platform::FileIO::DirectoryCreate(RunState->MainAllocator, RenderOutputPath.ToUTF8());
+	}
+
+	// Create timestamped file
+	const String TimeStamp = String::FromSystemTime(RunState->MainAllocator, Platform::Time::GetSystemTime(), true);
+	RenderOutputPath.AppendAsPath(&TimeStamp);
+	RenderOutputPath.Append(".ppm");
+	CORE_LOG(RunState->MainAllocator, "Rendering to %s", RenderOutputPath.ToUTF8());
 
     Platform::FileIO::File TestFile;
-    if (Platform::FileIO::Exists(RunState->MainAllocator, TestFilePath.ToUTF8())) {
-        Platform::FileIO::Remove(RunState->MainAllocator, TestFilePath.ToUTF8());
+	if (Platform::FileIO::Exists(RunState->MainAllocator, RenderOutputPath.ToUTF8())) {
+		Platform::FileIO::Remove(RunState->MainAllocator, RenderOutputPath.ToUTF8());
     }
 
-    if (!Platform::FileIO::CreateToWrite(&ProgramAllocator, TestFilePath.ToUTF8(), &TestFile)) {
+	if (!Platform::FileIO::CreateToWrite(&ProgramAllocator, RenderOutputPath.ToUTF8(), &TestFile)) {
         return;
     }
 
