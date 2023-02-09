@@ -44,14 +44,13 @@ namespace Platform {
 
 		enum class InputEventState
 		{
-			New,
-			Prepared,
-			Handled
+			Handled,
+			Prepared
 		};
 
 		struct InputEvent
 		{
-			InputEventState State = InputEventState::New;
+			InputEventState State = InputEventState::Handled;
 			u64 ID = 0;
 		};
 

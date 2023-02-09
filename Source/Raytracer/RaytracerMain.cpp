@@ -156,6 +156,7 @@ bool Update(ProgramState *RunState, Platform::Process::Window *MainWindow)
 			if (Event != nullptr) 
 			{
 				CORE_LOG(RunState->MainAllocator, "%llu", Event->ID);
+				Platform::Process::ClearInputEvent(Event);
 			}
 			
 			bOutOfInputs = true;

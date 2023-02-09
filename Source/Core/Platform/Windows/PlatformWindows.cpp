@@ -130,7 +130,8 @@ namespace Platform {
 	{
 		for (usize i = 0; i < CORE_PLATFORM_MAX_INPUT_EVENTS; ++i)
 		{
-			if (InputEventList[i].State == InputEventState::New)
+			InputEvent &Event = InputEventList[i];
+			if (Event.State != InputEventState::Prepared && Event.ID == 0)
 			{
 				OutIndex = i;
 				return true;
@@ -324,10 +325,15 @@ namespace Platform {
 			InputDevices[0].hwndTarget = Result->Handle;
 
 			// Keyboard
-			InputDevices[0].usUsagePage = (USHORT) HID_CLIENT_PAGE;
-			InputDevices[0].usUsage = (USHORT) HID_CLIENT_KEYBOARD;
+			InputDevices[1].usUsagePage = (USHORT) HID_CLIENT_PAGE;
+			InputDevices[1].usUsage = (USHORT) HID_CLIENT_KEYBOARD;
+			InputDevices[1].hwndTarget = Result->Handle;
 
-			RegisterRawInputDevices(InputDevices, 2, sizeof(InputDevices[0]));
+			if (!RegisterRawInputDevices(InputDevices, 2, sizeof(InputDevices[0])))
+			{
+				CORE_LOG(Allocator, "%s\n", Platform::GetLastSystemError(Allocator));
+				return nullptr;
+			}
 		}
 		Result->State = WindowState::Active;
 		return Result;
@@ -352,9 +358,9 @@ namespace Platform {
 					InputDevices[0].dwFlags = RIDEV_REMOVE;
 
 					// Keyboard
-					InputDevices[0].usUsagePage = (USHORT) HID_CLIENT_PAGE;
-					InputDevices[0].usUsage = (USHORT) HID_CLIENT_KEYBOARD;
-					InputDevices[0].dwFlags = RIDEV_REMOVE;
+					InputDevices[1].usUsagePage = (USHORT) HID_CLIENT_PAGE;
+					InputDevices[1].usUsage = (USHORT) HID_CLIENT_KEYBOARD;
+					InputDevices[1].dwFlags = RIDEV_REMOVE;
 
 					RegisterRawInputDevices(InputDevices, 2, sizeof(InputDevices[0]));
 				}
@@ -389,6 +395,12 @@ namespace Platform {
 		}
 		
 		return nullptr;
+	}
+
+	void Process::ClearInputEvent(Process::InputEvent* Event)
+	{
+		Event->State = InputEventState::Handled;
+		Event->ID = 0;
 	}
 }
 }

@@ -83,6 +83,7 @@ namespace Platform {
 		void WindowUpdate(Window* Window);
 
 		InputEvent* GetNextInputEvent();
+		void ClearInputEvent(InputEvent* Event);
     }
 }
 }
