@@ -173,4 +173,24 @@ union Vector3
 };
 
 Vector3 RayCast(const Vector3 &Origin, const Vector3 &Direction, const f32 Position);
+
+
+union Rect
+{
+	Rect(std::initializer_list<f32> List)
+	{
+		CORE_ASSERT(List.size() == 4);
+		memcpy(Elements.Buffer, List.begin(), (sizeof(f32) * List.size()));
+	}
+
+	struct
+	{
+		f32 X;
+		f32 Y;
+		f32 W;
+		f32 H;
+	};
+	Container::Array<f32, 4> Elements;
+};
+
 }

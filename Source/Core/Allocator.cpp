@@ -53,45 +53,91 @@ void AllocatorCRT::Free(void *Pointer, const usize Size)
     free(Pointer);
 }
 
-AllocatorTLSF::AllocatorTLSF(const usize InBlockSizeInBytes)
+void *AllocatorMiMalloc::Allocate(const usize Size, const usize Alignment)
 {
-    CORE_ASSERT(InBlockSizeInBytes > 0);
+	void *Result = mi_malloc_aligned(Size, Alignment);
+	CORE_ASSERT(Result != nullptr);
+	return Result;
+}
 
-    const usize AllocatorObjectSize = tlsf_size();
-    const usize PoolOverheadSize = tlsf_pool_overhead();
-    TotalAllocationSize = AllocatorObjectSize + PoolOverheadSize + InBlockSizeInBytes;
+void *AllocatorMiMalloc::Reallocate(void *OldPointer, const usize NewSize, const usize Alignment)
+{
+	CORE_ASSERT(OldPointer != nullptr);
+	void *Result = mi_realloc_aligned(OldPointer, NewSize, Alignment);
+	CORE_ASSERT(Result != nullptr);
+	return Result;
+}
 
-    AllocatorBacking = Platform::VirtualMemory::Reserve(TotalAllocationSize, Platform::VirtualMemory::Flags::ReadWrite);
-    Platform::VirtualMemory::Commit(AllocatorBacking, TotalAllocationSize, Platform::VirtualMemory::Flags::ReadWrite);
-    CORE_ASSERT(AllocatorBacking != nullptr);
+void AllocatorMiMalloc::Free(void *Pointer, const usize Size)
+{
+	CORE_ASSERT(Pointer != nullptr);
+	mi_free(Pointer);
+}
 
-    TLSF = tlsf_create_with_pool(AllocatorBacking, TotalAllocationSize);
+AllocatorTLSF::AllocatorTLSF(const usize InPoolSize)
+{
+	Platform::VirtualMemory::MemoryStats SystemStats = Platform::VirtualMemory::GetMemoryStats();
+	CORE_ASSERT(InPoolSize >= SystemStats.MinimumAllocationSize);
+	PoolSize = InPoolSize;
+
+	AllocatorBacking = malloc(tlsf_size()); // TODO: Move this allocation into the first VirtualAlloc pool call?
+	TLSF = tlsf_create(AllocatorBacking);
+	CurrentPool = CreatePool();
 }
 
 AllocatorTLSF::~AllocatorTLSF()
 {
+	while (CurrentPool != nullptr)
+	{
+		tlsf_remove_pool(TLSF, CurrentPool->Handle);
+		Platform::VirtualMemory::Decommit(CurrentPool, PoolSize);
+		CurrentPool = CurrentPool->Previous;
+	}
+
     tlsf_destroy(TLSF);
-    Platform::VirtualMemory::Decommit(AllocatorBacking, TotalAllocationSize);
+	free(AllocatorBacking);
     AllocatorBacking = nullptr;
+}
+
+AllocatorTLSF::TLSFPool* AllocatorTLSF::CreatePool()
+{
+	TLSFPool *NewPool = (TLSFPool*) Platform::VirtualMemory::Reserve(PoolSize, Platform::VirtualMemory::Flags::ReadWrite);
+	Platform::VirtualMemory::Commit(NewPool, PoolSize, Platform::VirtualMemory::Flags::ReadWrite);
+
+	const usize BlockOffset = sizeof(TLSFPool);
+	NewPool->Block = (u8 *) NewPool + BlockOffset;
+	NewPool->UsedSpace = 0;
+	NewPool->Handle = tlsf_add_pool(TLSF, NewPool->Block, PoolSize - BlockOffset);
+	NewPool->Previous = CurrentPool;
+	return NewPool;
 }
 
 void *AllocatorTLSF::Allocate(const usize Size, const usize Alignment)
 {
-    void *Result = tlsf_malloc(TLSF, Size); // TODO: Apply alignment?
-    CORE_ASSERT(Result != nullptr);
-    return Result;
+	const usize BlockOffset = sizeof(TLSFPool);
+	const usize ActualFreeSpace = PoolSize - (CurrentPool->UsedSpace + BlockOffset + tlsf_pool_overhead());
+
+	CORE_ASSERT(Size <= ActualFreeSpace);
+
+	void *Result = tlsf_memalign(TLSF, Alignment, Size);
+	CORE_ASSERT(Result != nullptr);
+	CurrentPool->UsedSpace += Size;
+	return Result;
 }
 
 void *AllocatorTLSF::Reallocate(void *OldPointer, const usize NewSize, const usize Alignment)
 {
     void *Result = tlsf_realloc(TLSF, OldPointer, NewSize);
     CORE_ASSERT(Result != nullptr);
+	CurrentPool->UsedSpace += NewSize; // TODO: Double check the sizes here
     return Result;
 }
 
 void AllocatorTLSF::Free(void *Pointer, const usize Size)
 {
+	CORE_ASSERT(Pointer != nullptr);
     tlsf_free(TLSF, Pointer);
+	CurrentPool->UsedSpace -= Size;
 }
 
 AllocatorLinear::AllocatorLinear(Allocator *InBackingAllocator, const usize BlockSizeInBytes)

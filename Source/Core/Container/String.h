@@ -21,19 +21,17 @@ namespace Container {
             Buffer.Add('\0');
         }
 
-        String(Core::Allocator *InAllocator, const char *InStringLiteral, const usize InLength)
-            : Buffer(InAllocator, InLength)
-        {
-            Buffer.Set(InStringLiteral, InLength);
-            Buffer.Add('\0');
-        }
+		String(Core::Allocator *InAllocator, const char *InStringLiteral, const usize InLength)
+			: Buffer(InAllocator, InLength)
+		{
+			Buffer.Set(InStringLiteral, InLength);
+			Buffer.Add('\0');
+		}
 
-        String(Core::Allocator *InAllocator, const char *InStringLiteral)
-            : Buffer(InAllocator)
-        {
-            Buffer.Set(InStringLiteral, strlen(InStringLiteral));
-            Buffer.Add('\0');
-        }
+		String(const String& Copy)
+			: Buffer(Copy.Buffer)
+		{
+		}
 
         ~String()
         {
@@ -65,11 +63,13 @@ namespace Container {
 
         void Append(const char *StringLiteral)
         {
+			CORE_ASSERT(StringLiteral != nullptr);
             Append(StringLiteral, strlen(StringLiteral));
         }
 
         void Append(const char *StringLiteral, const usize Length)
         {
+			CORE_ASSERT(StringLiteral != nullptr);
             if (IsNullTerminated() && Buffer.Count > 0) {
                 Buffer.RemoveAt(Buffer.Count - 1);
             }
@@ -80,15 +80,18 @@ namespace Container {
 
         void AppendAsPath(const char *StringLiteral)
         {
+			CORE_ASSERT(StringLiteral != nullptr);
             Append(Platform::FileIO::GetPathSeperator());
             Append(StringLiteral);
         }
 
         void AppendAsPath(const String *InBuffer)
         {
+			CORE_ASSERT(InBuffer != nullptr);
             AppendAsPath(InBuffer->ToUTF8());
         }
 
+		// TODO: Removing the null terminator every single time - rethink this?
         void AppendFormat(const char *Format, ...)
         {
             va_list VArgs;
@@ -116,9 +119,9 @@ namespace Container {
                 Buffer.RemoveAt(Buffer.Count - 1);
             }
 
-            const usize originalSize = Buffer.Count;
+			const usize OriginalSize = Buffer.Count;
             for (usize i = 0; i < Count; ++i) {
-                Buffer.RemoveAt(originalSize - i);
+                Buffer.RemoveAt(OriginalSize - i);
             }
 
             Buffer.Add('\0');
@@ -140,7 +143,7 @@ namespace Container {
 
         bool IsNullTerminated() const
         {
-            return Buffer.Buffer[Length()] == 0 ? true : false;
+            return Buffer.Buffer[Length() - 1] == 0 ? true : false;
         }
 
         usize Length() const
@@ -164,21 +167,7 @@ namespace Container {
 			return strtof(String, EndPoint);
 		}
 
-		static String FromSystemTime(Core::Allocator *InAllocator, const Platform::Time::SystemTime& Time, const bool bWithUnderScores)
-		{
-			char TempBuffer[STRING_FORMAT_BUFFER];
-			if (bWithUnderScores)
-			{
-				stbsp_sprintf(TempBuffer, "%lu_%lu_%lu_%lu_%lu_%lu_%lu", Time.Day, Time.Month, Time.Year, Time.Hour, Time.Minute, Time.Second, Time.Milliseconds);
-			}
-			else
-			{
-				stbsp_sprintf(TempBuffer, "%lu/%lu/%lu %lu:%lu:%lu:%lu", Time.Day, Time.Month, Time.Year, Time.Hour, Time.Minute, Time.Second, Time.Milliseconds);
-			}
-			
-			String Result(InAllocator, TempBuffer, strlen(TempBuffer));
-			return Result;
-		}
+		static String FromSystemTime(Core::Allocator *InAllocator, const Platform::Time::SystemTime& Time, const bool bWithUnderScores);
 
         Container::DynamicArray<char> Buffer;
     };

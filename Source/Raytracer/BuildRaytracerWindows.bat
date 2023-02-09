@@ -7,12 +7,19 @@ set WorkingDirectory=%~dp0
 
 REM Input
 REM TODO: Recursive add to a variable instead of this file hack
+if exist %WorkingDirectory%\SourceFiles.txt del %WorkingDirectory%\SourceFiles.txt
+
 REM 3rd Party
 set SourceFiles=%WorkingDirectory%..\3rdParty\tlsf\tlsf.c
 
+REM 3rd Party - MiMalloc
+set SourceMiMallocDirectory=%WorkingDirectory%..\3rdParty\mimalloc\src
+for /f %%i in ('FORFILES /P %SourceMiMallocDirectory% /S /M static.c /C "cmd /c echo @PATH"') do (
+	echo %%~i >> %WorkingDirectory%\SourceFiles.txt
+)
+
 REM Core
 set SourceCoreDirectory=%WorkingDirectory%..\Core
-if exist %WorkingDirectory%\SourceFiles.txt del %WorkingDirectory%\SourceFiles.txt
 for /f %%i in ('FORFILES /P %SourceCoreDirectory% /S /M *.cpp /C "cmd /c echo @PATH"') do (
 	echo %%~i >> %WorkingDirectory%\SourceFiles.txt
 )
@@ -34,7 +41,7 @@ REM Project files
 set SourceFiles=%SourceFiles% %WorkingDirectory%RaytracerMain.cpp
 
 REM Include files
-set IncludePaths=/I%SourceCoreDirectory%
+set IncludePaths=/I%SourceCoreDirectory% /I%WorkingDirectory%..\3rdParty\mimalloc\include
 set SuperluminalPath=/I"%SUPERLUMINAL_API_DIR%"\include
 set IncludePaths=%IncludePaths% %SuperluminalPath%
 
@@ -63,9 +70,8 @@ REM Build and run unit tests
 REM TODO: Call unit test build script, exit this script on fail
 
 REM Run compiler
-cl %CompilerFlags% %CompilerDefines% %CompilerOptimisation% /Fe"%OutputDirectory%\%ProjectName%" %IncludePaths% %SourceFiles% %LibFiles%
+cl %CompilerFlags% %CompilerDefines% %CompilerOptimisation% /Fe"%OutputDirectory%\%ProjectName%" %IncludePaths% %SourceFiles% %LibFiles% /link /SUBSYSTEM:windows
 
 popd
 
-if exist %WorkingDirectory%\SourceFiles.txt del /q /f %WorkingDirectory%\SourceFiles.txt
 endlocal

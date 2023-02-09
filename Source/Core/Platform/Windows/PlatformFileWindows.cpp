@@ -50,7 +50,7 @@ namespace Platform {
             wchar_t *WidePath = reinterpret_cast<wchar_t *>(UTF8ToUTF16(Allocator, Path));
             const HANDLE Handle = CreateFileW(WidePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE, 0, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, 0);
             if (Handle == INVALID_HANDLE_VALUE) {
-                printf("%s\n", Platform::GetLastSystemError(Allocator));
+				CORE_LOG(Allocator, "%s\n", Platform::GetLastSystemError(Allocator));
                 return false;
             }
             File->Handle = reinterpret_cast<u64>(Handle);
@@ -62,7 +62,7 @@ namespace Platform {
             wchar_t *WidePath = reinterpret_cast<wchar_t *>(UTF8ToUTF16(Allocator, Path));
             const HANDLE Handle = CreateFileW(WidePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
             if (Handle == INVALID_HANDLE_VALUE) {
-                printf("%s\n", Platform::GetLastSystemError(Allocator));
+				CORE_LOG(Allocator, "%s\n", Platform::GetLastSystemError(Allocator));
                 return false;
             }
             File->Handle = reinterpret_cast<u64>(Handle);
@@ -79,18 +79,12 @@ namespace Platform {
             do {
                 DWORD BytesWritten = 0;
                 if (!WriteFile(reinterpret_cast<HANDLE>(File->Handle), Buffer, BytesToWrite, &BytesWritten, 0)) {
-                    printf("%s\n", Platform::GetLastSystemError(Allocator));
+					CORE_LOG(Allocator, "%s\n", Platform::GetLastSystemError(Allocator));
                     return false;
                 }
 
-                BytesToWrite -= SizeInBytes;
-                Buffer += SizeInBytes;
-
-                if (BytesToWrite != BytesWritten) {
-                    printf("%s\n", Platform::GetLastSystemError(Allocator));
-                    return false;
-                }
-
+				BytesToWrite -= BytesWritten;
+				Buffer += BytesWritten;
             } while (BytesToWrite > 0);
 
             return true;
@@ -100,7 +94,7 @@ namespace Platform {
         {
             wchar_t *WidePath = reinterpret_cast<wchar_t *>(UTF8ToUTF16(Allocator, Path));
             if (!DeleteFileW(WidePath)) {
-                printf("%s\n", Platform::GetLastSystemError(Allocator));
+				CORE_LOG(Allocator, "%s\n", Platform::GetLastSystemError(Allocator));
                 return false;
             }
 

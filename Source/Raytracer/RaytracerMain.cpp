@@ -8,9 +8,7 @@ using namespace Core;
 using namespace Core::Container;
 
 typedef struct ProgramState {
-    usize TotalMemoryInBytes;
-    AllocatorTLSF *BackingAllocator = nullptr;
-    AllocatorLinear *MainAllocator = nullptr;
+    Core::Allocator *MainAllocator = nullptr;
     char **Arguments;
 } ProgramState;
 
@@ -92,17 +90,15 @@ void Run(ProgramState *RunState)
 {
     PROFILER_EVENT_START("Run", ColourSRGBA::CreateRed());
 
-    AllocatorLinear ProgramAllocator = AllocatorLinear(RunState->BackingAllocator, RunState->TotalMemoryInBytes);
-    RunState->MainAllocator = &ProgramAllocator;
-
-    String RenderOutputPath(RunState->MainAllocator, RunState->Arguments[1]);
+	String RenderOutputPath(RunState->MainAllocator, RunState->Arguments[1], strlen(RunState->Arguments[1]));
 	if (!Platform::FileIO::DirectoryExists(RunState->MainAllocator, RenderOutputPath.ToUTF8()))
 	{
 		Platform::FileIO::DirectoryCreate(RunState->MainAllocator, RenderOutputPath.ToUTF8());
 	}
 
 	// Create timestamped file
-	const String TimeStamp = String::FromSystemTime(RunState->MainAllocator, Platform::Time::GetSystemTime(), true);
+	String TimeStamp = String::FromSystemTime(RunState->MainAllocator, Platform::Time::GetSystemTime(), true);
+
 	RenderOutputPath.AppendAsPath(&TimeStamp);
 	RenderOutputPath.Append(".ppm");
 	CORE_LOG(RunState->MainAllocator, "Rendering to %s", RenderOutputPath.ToUTF8());
@@ -112,7 +108,7 @@ void Run(ProgramState *RunState)
 		Platform::FileIO::Remove(RunState->MainAllocator, RenderOutputPath.ToUTF8());
     }
 
-	if (!Platform::FileIO::CreateToWrite(&ProgramAllocator, RenderOutputPath.ToUTF8(), &TestFile)) {
+	if (!Platform::FileIO::CreateToWrite(RunState->MainAllocator, RenderOutputPath.ToUTF8(), &TestFile)) {
         return;
     }
 
@@ -147,18 +143,68 @@ void Run(ProgramState *RunState)
     PROFILER_EVENT_STOP();
 }
 
+bool Update(ProgramState *RunState, Platform::Process::Window *MainWindow)
+{
+	while (MainWindow->State == Platform::Process::WindowState::Active)
+	{
+		Platform::Process::WindowUpdate(MainWindow);
+
+		bool bOutOfInputs = false;
+		do
+		{
+			Platform::Process::InputEvent* Event = Platform::Process::GetNextInputEvent();
+			if (Event != nullptr) 
+			{
+				CORE_LOG(RunState->MainAllocator, "%llu", Event->ID);
+			}
+			
+			bOutOfInputs = true;
+		} while (!bOutOfInputs);
+
+		if (MainWindow->State == Platform::Process::WindowState::Closed)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+#if defined(CORE_PLATFORM_WINDOWS)
+int CALLBACK WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int ShowCommand)
+#else
 int main(int argc, char *argv[])
+#endif
 {
     PROFILER_THREAD_ID("Main");
 
-    ProgramState RunState = {};
-    RunState.TotalMemoryInBytes = Megabytes(64);
-    RunState.Arguments = argv;
+	ProgramState RunState = {};
+	AllocatorMiMalloc GlobalAllocator;
+	RunState.MainAllocator = &GlobalAllocator;
 
-    AllocatorTLSF GlobalAllocator = AllocatorTLSF(RunState.TotalMemoryInBytes);
-    RunState.BackingAllocator = &GlobalAllocator;
 
-    Run(&RunState);
+	const Platform::Process::CommandLineParameters ArgParameters = Platform::Process::GetCommandLineParameters();
+	RunState.Arguments = (char**) RunState.MainAllocator->Allocate(sizeof(char) * ArgParameters.Size);
+	Platform::Process::GetCommandLineArguments(RunState.MainAllocator, ArgParameters, RunState.Arguments);
+
+	Rect DefaultRect = { 100, 100, 1920, 1080 };
+	Platform::Process::Window *MainWindow = Platform::Process::WindowCreate(RunState.MainAllocator, &DefaultRect, "Raytracer");
+	if (MainWindow == nullptr)
+	{
+		return -1;
+	}
+
+	if (!Update(&RunState, MainWindow))
+	{
+		Platform::Process::WindowDestroy(MainWindow);
+	}
+
+	Run(&RunState);
+
+	RunState.MainAllocator->Free(RunState.Arguments, ArgParameters.Size);
+
+
 
     return 0;
 }

@@ -7,3 +7,6 @@
 [submodule "Source/3rdParty/mimalloc"]
 	path = Source/3rdParty/mimalloc
 	url = https://github.com/microsoft/mimalloc.git
+[submodule "Source/3rdParty/imgui"]
+	path = Source/3rdParty/imgui
+	url = https://github.com/ocornut/imgui.git

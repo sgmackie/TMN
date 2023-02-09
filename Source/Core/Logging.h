@@ -20,8 +20,8 @@
 #define CORE_ASSERT(Condition) assert(Condition)
 
 // Logging
-#define CORE_LOG(TempAllocator, Format, ...) \
-    LogMessage(TempAllocator, __FILE__, __LINE__, BuildMessage(TempAllocator, "" Format "", ##__VA_ARGS__))
+#define CORE_LOG(Allocator, Format, ...) \
+	LogMessage(Allocator, __FILE__, __LINE__, BuildMessage(Allocator, "" Format "", ##__VA_ARGS__))
 
 namespace Core {
 char *BuildMessage(Core::Allocator *Allocator, const char *Format, ...);

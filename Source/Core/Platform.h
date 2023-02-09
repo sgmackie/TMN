@@ -2,6 +2,7 @@
 
 #include "Allocator.h"
 #include "CoreTypes.h"
+#include "CoreMath.h"
 
 namespace Core {
 namespace Platform {
@@ -14,6 +15,7 @@ namespace Platform {
             u64 TotalPhysical;
             u64 TotalVirtual;
             usize PageSize;
+            usize MinimumAllocationSize;
         };
 
         enum class Flags {
@@ -63,8 +65,24 @@ namespace Platform {
         void Close(File *File);
     }
 
-    namespace Process {
-        void PrintToConsole(Core::Allocator *Allocator, const char *Buffer);
+	namespace Process {
+		typedef struct Window Window;
+		typedef struct InputEvent InputEvent;
+
+		struct CommandLineParameters
+		{
+			usize Size;
+			i32 Count;
+		};
+
+		void PrintToConsole(Core::Allocator *Allocator, const char *Buffer);
+		CommandLineParameters GetCommandLineParameters();
+		void GetCommandLineArguments(Core::Allocator *Allocator, CommandLineParameters Parameters, char** ArgBuffer);
+		Window* WindowCreate(Core::Allocator *Allocator, Rect* Rect, const char* Title);
+		void WindowDestroy(Window* Window);
+		void WindowUpdate(Window* Window);
+
+		InputEvent* GetNextInputEvent();
     }
 }
 }

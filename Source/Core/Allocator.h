@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../3rdParty/tlsf/tlsf.h"
+#include "mimalloc.h"
 #include "CoreTypes.h"
 
 #define ARENA_DEFAULT_ALIGNMENT 4
@@ -51,18 +52,37 @@ public:
     void Free(void *Pointer, const usize Size = 0) override;
 };
 
+class AllocatorMiMalloc : public Allocator
+{
+public:
+	void *Allocate(const usize Size, const usize Alignment = ALLOCATOR_DEFAULT_ALIGNMENT) override;
+	void *Reallocate(void *OldPointer, const usize NewSize, const usize Alignment = ALLOCATOR_DEFAULT_ALIGNMENT) override;
+	void Free(void *Pointer, const usize Size = 0) override;
+};
+
+
 class AllocatorTLSF : public Allocator
 {
 public:
-    AllocatorTLSF(const usize InBlockSizeInBytes);
+	struct TLSFPool
+	{
+		pool_t Handle = nullptr;
+		usize UsedSpace = 0;
+		void *Block = nullptr;
+		TLSFPool *Previous = nullptr;
+	};
+
+    AllocatorTLSF(const usize InPoolSize);
     ~AllocatorTLSF();
     void *Allocate(const usize Size, const usize Alignment = ALLOCATOR_DEFAULT_ALIGNMENT) override;
     void *Reallocate(void *OldPointer, const usize NewSize, const usize Alignment = ALLOCATOR_DEFAULT_ALIGNMENT) override;
     void Free(void *Pointer, const usize Size = 0) override;
+	TLSFPool* CreatePool();
 
     void *AllocatorBacking = nullptr;
-    usize TotalAllocationSize = 0;
+    usize PoolSize = 0;
     tlsf_t TLSF;
+	TLSFPool *CurrentPool = nullptr;
 };
 
 class AllocatorLinear : public Allocator

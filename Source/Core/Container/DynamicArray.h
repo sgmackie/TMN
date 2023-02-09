@@ -29,6 +29,13 @@ namespace Container {
             }
         }
 
+		DynamicArray(const DynamicArray& Copy)
+		{
+			Allocator = Copy.Allocator;
+			Buffer = StackBuffer;
+			Set(Copy.Buffer, Copy.Count);
+		}
+
         ~DynamicArray()
         {
             if (IsDynamicallyAllocated()) {
@@ -153,11 +160,11 @@ namespace Container {
             return sizeof(T) * Count;
         }
 
-        usize Count;
-        usize Capacity;
+        usize Count = 0;
+        usize Capacity = 0;
         T StackBuffer[DYNAMIC_ARRAY_MAX_STACK_ELEMENTS];
-        T *Buffer;
-        Core::Allocator *Allocator;
+        T *Buffer = nullptr;
+		Core::Allocator *Allocator = nullptr;
     };
 }
 }
