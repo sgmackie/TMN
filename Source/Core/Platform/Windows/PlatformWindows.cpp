@@ -203,17 +203,49 @@ namespace Platform {
 				InputEvent Event = {};
 				if (InputData->header.dwType == RIM_TYPEMOUSE)
 				{
+					RAWMOUSE *Mouse = &InputData->data.mouse;
+					usize FreeEventSlot;
+					if (GetNextInputEventIndex(FreeEventSlot))
+					{
+						InputEvent Event = {};
+						
+						// Move
+						// TODO: Enum this
+						if ((Mouse->usFlags & 0x1) == MOUSE_MOVE_RELATIVE)
+						{
+							POINT CursorPosition;
+							if (GetCursorPos(&CursorPosition)) 
+							{
+								Event.ID = 1;
+								Event.Data.XY[0] = (f32) CursorPosition.x;
+								Event.Data.XY[1] = (f32) CursorPosition.y;
+							}
+						}
 
+						// Buttons
+						if (Mouse->usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN)
+						{
+							Event.ID = 2;
+						}
+						else if (Mouse->usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN)
+						{
+							Event.ID = 3;
+						}
+
+						Event.Type = InputEventType::Mouse;
+						Event.State = InputEventState::Prepared;
+						InputEventList[FreeEventSlot] = Event;
+					}
 				}
 				else if (InputData->header.dwType == RIM_TYPEKEYBOARD)
 				{
 					RAWKEYBOARD *Keyboard = &InputData->data.keyboard;
-
 					usize FreeEventSlot;
 					if (GetNextInputEventIndex(FreeEventSlot))
 					{
 						InputEvent Event = {};
 						Event.ID = Keyboard->VKey;
+						Event.Type = InputEventType::Keyboard;
 						Event.State = InputEventState::Prepared;
 						InputEventList[FreeEventSlot] = Event;
 					}

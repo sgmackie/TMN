@@ -155,7 +155,14 @@ bool Update(ProgramState *RunState, Platform::Process::Window *MainWindow)
 			Platform::Process::InputEvent* Event = Platform::Process::GetNextInputEvent();
 			if (Event != nullptr) 
 			{
-				CORE_LOG(RunState->MainAllocator, "%llu", Event->ID);
+				if (Event->Type == Platform::Process::InputEventType::Mouse)
+				{
+					CORE_LOG(RunState->MainAllocator, "Mouse: %llu %f %f", Event->ID, Event->Data.XY[0], Event->Data.XY[1]);
+				}
+				else
+				{
+					CORE_LOG(RunState->MainAllocator, "Keyboard: %llu", Event->ID);
+				}
 				Platform::Process::ClearInputEvent(Event);
 			}
 			

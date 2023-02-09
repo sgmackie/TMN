@@ -48,10 +48,23 @@ namespace Platform {
 			Prepared
 		};
 
+		enum class InputEventType
+		{
+			Mouse,
+			Keyboard
+		};
+
+
 		struct InputEvent
 		{
 			InputEventState State = InputEventState::Handled;
+			InputEventType Type = InputEventType::Mouse;
 			u64 ID = 0;
+
+			union Data
+			{
+				f32 XY[2];
+			} Data;
 		};
 
 		#define WINDOWS_INPUT_BUFFER_SIZE 2048
@@ -65,6 +78,7 @@ namespace Platform {
 		
 		#define CORE_PLATFORM_MAX_INPUT_EVENTS 64
 		static InputEvent InputEventList[CORE_PLATFORM_MAX_INPUT_EVENTS];
+
 
 		// https://learn.microsoft.com/en-us/windows-hardware/drivers/hid/hid-architecture#hid-clients-supported-in-windows
 		static const i32 HID_CLIENT_PAGE = 0x01;
