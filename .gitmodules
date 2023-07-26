@@ -10,3 +10,6 @@
 [submodule "Source/3rdParty/imgui"]
 	path = Source/3rdParty/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "Source/3rdParty/SDL"]
+	path = Source/3rdParty/SDL
+	url = https://github.com/libsdl-org/SDL.git

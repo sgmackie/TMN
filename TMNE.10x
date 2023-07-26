@@ -3,8 +3,9 @@
 	<Workspace>
 		<IncludeFilter>x86,</IncludeFilter>
 		<ExcludeFilter></ExcludeFilter>
-		<SyncFiles>true</SyncFiles>
+		<SyncFiles>false</SyncFiles>
 		<Recursive>true</Recursive>
+		<ShowEmptyFolders>true</ShowEmptyFolders>
 		<IsVirtual>false</IsVirtual>
 		<IsFolder>false</IsFolder>
 		<BuildCommand>call $(RootWorkspaceDirectory)/BuildAllWindows.bat $(Configuration)</BuildCommand>
@@ -12,6 +13,7 @@
 		<BuildFileCommand></BuildFileCommand>
 		<CleanCommand></CleanCommand>
 		<BuildWorkingDirectory></BuildWorkingDirectory>
+		<CancelBuild></CancelBuild>
 		<RunCommand>$(RootWorkspaceDirectory)/Bin/Raytracer/$(Configuration)/Raytracer.exe</RunCommand>
 		<DebugCommand>devenv  /DebugExe $(RootWorkspaceDirectory)/Bin/Raytracer/$(Configuration)/Raytracer.exe TEST.ppm</DebugCommand>
 		<ExePathCommand>$(RootWorkspaceDirectory)/Bin/Raytracer/$(Configuration)/Raytracer.exe</ExePathCommand>
@@ -78,6 +80,77 @@
 				<Defines></Defines>
 			</Platform>
 		</ConfigProperties>
-		<Children></Children>
+		<Children>
+			<Folder>
+				<Path>.git</Path>
+				<IncludeFilter>x86,</IncludeFilter>
+				<ExcludeFilter></ExcludeFilter>
+				<SyncFiles>true</SyncFiles>
+				<Recursive>true</Recursive>
+				<ShowEmptyFolders>true</ShowEmptyFolders>
+				<IsVirtual>false</IsVirtual>
+				<Children></Children>
+			</Folder>
+			<Folder>
+				<Path>.vscode</Path>
+				<IncludeFilter>x86,</IncludeFilter>
+				<ExcludeFilter></ExcludeFilter>
+				<SyncFiles>true</SyncFiles>
+				<Recursive>true</Recursive>
+				<ShowEmptyFolders>true</ShowEmptyFolders>
+				<IsVirtual>false</IsVirtual>
+				<Children></Children>
+			</Folder>
+			<Folder>
+				<Path>Bin</Path>
+				<IncludeFilter>x86,</IncludeFilter>
+				<ExcludeFilter></ExcludeFilter>
+				<SyncFiles>true</SyncFiles>
+				<Recursive>true</Recursive>
+				<ShowEmptyFolders>true</ShowEmptyFolders>
+				<IsVirtual>false</IsVirtual>
+				<Children></Children>
+			</Folder>
+			<Folder>
+				<Path>Data</Path>
+				<IncludeFilter>x86,</IncludeFilter>
+				<ExcludeFilter></ExcludeFilter>
+				<SyncFiles>true</SyncFiles>
+				<Recursive>true</Recursive>
+				<ShowEmptyFolders>true</ShowEmptyFolders>
+				<IsVirtual>false</IsVirtual>
+				<Children></Children>
+			</Folder>
+			<Folder>
+				<Path>Debug</Path>
+				<IncludeFilter>x86,</IncludeFilter>
+				<ExcludeFilter></ExcludeFilter>
+				<SyncFiles>true</SyncFiles>
+				<Recursive>true</Recursive>
+				<ShowEmptyFolders>true</ShowEmptyFolders>
+				<IsVirtual>false</IsVirtual>
+				<Children></Children>
+			</Folder>
+			<Folder>
+				<Path>Source</Path>
+				<IncludeFilter>x86,</IncludeFilter>
+				<ExcludeFilter></ExcludeFilter>
+				<SyncFiles>true</SyncFiles>
+				<Recursive>true</Recursive>
+				<ShowEmptyFolders>true</ShowEmptyFolders>
+				<IsVirtual>false</IsVirtual>
+				<Children></Children>
+			</Folder>
+			<Folder>
+				<Path></Path>
+				<IncludeFilter>*.c,*.cc,*.cpp,*.c++,*.cp,*.cxx,*.h,*.hh,*.hpp,*.h++,*.hp,*.hxx,*.inl,*.cs,*.rs,*.java,*.jav,*.js,*.jsc,*.jsx,*.json,*.cls,*.py,*.rpy,*.php,*.php3,*.phl,*.phtml,*.rhtml,*.tpl,*.phps,*.lua,*.html,*.html5,*.htm,*.xml,*.xaml,*.css,*.ssi,*.haml,*.yaml,*.bat,*.wbf,*.wbt,*.txt,*.cmake,*.make,*.makefile,*.mak,*.mk,*.sh,*.bash,*.csv,*.asp,*.pl,*.mac,*.ws,*.vbs,*.perl,*.src,*.rss,*.inc,*.f,*.go,*.prl,*.plx,*.rb,*.lsp,*.lpx,*.ps1,*.command,*.cbl,*.cob,*.qs,*.wxs,*.ph,*.msc,*.glsl,*.hlsl,*.fx,*.vert,*.tesc,*.tese,*.geom,*.frag,*.comp,*.pssl,*.scons,*.cu,</IncludeFilter>
+				<ExcludeFilter></ExcludeFilter>
+				<SyncFiles>true</SyncFiles>
+				<Recursive>true</Recursive>
+				<ShowEmptyFolders>true</ShowEmptyFolders>
+				<IsVirtual>false</IsVirtual>
+				<Children></Children>
+			</Folder>
+		</Children>
 	</Workspace>
 </N10X>

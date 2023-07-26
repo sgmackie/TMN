@@ -1,10 +1,2 @@
 Bin/
-.vs/
-*.rdbg
-*.exe
-net6.0/
-obj/
-*.xcworkspace
-*.xcodeproj
-compile_flags.txt
-SourceFiles.txt
+Debug/
