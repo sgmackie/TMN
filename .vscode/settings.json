@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "coretypes.h": "c",
+        "sdl.h": "c",
+        "sdl_video.h": "c",
+        "corelogging.h": "c",
+        "stdint.h": "c",
+        "xiosbase": "c"
+    }
+}
